@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Organizer Login</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <a href="index.php">Back</a>
+    <h2>Event Organizer Login</h2>
+    <form action="event_organizer-login.php" method="post">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br>
+
+        <p>Not registered? <a href="event_organizer-register.php">Register here</a></p>
+        
+        <input type="submit" value="Login">
+    </form>
+
+    <?php
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+
+        // Dummy credentials for demonstration
+        $valid_username = "organizer";
+        $valid_password = "password123";
+
+        if ($username == $valid_username && $password == $valid_password) {
+            echo "<p>Login successful! Welcome, $username.</p>";
+        } else {
+            echo "<p>Invalid username or password. Please try again.</p>";
+        }
+    }
+    ?>
+</body>
+</html>
