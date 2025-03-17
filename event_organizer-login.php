@@ -17,24 +17,7 @@
 
         <p>Not registered? <a href="event_organizer-register.php">Register here</a></p>
         
-        <input type="submit" value="Login">
+        <button><a href="events-event_organizer.php">Login</a></button>
     </form>
-
-    <?php
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $username = $_POST['username'];
-        $password = $_POST['password'];
-
-        // Dummy credentials for demonstration
-        $valid_username = "organizer";
-        $valid_password = "password123";
-
-        if ($username == $valid_username && $password == $valid_password) {
-            echo "<p>Login successful! Welcome, $username.</p>";
-        } else {
-            echo "<p>Invalid username or password. Please try again.</p>";
-        }
-    }
-    ?>
 </body>
 </html>

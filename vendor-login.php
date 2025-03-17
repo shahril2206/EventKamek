@@ -15,7 +15,7 @@
         <label for="password">Password:</label><br>
         <input type="password" id="password" name="password" required><br>
         <p>Not registered? <a href="vendor-register.php">Register here</a></p>
-        <button type="submit">Login</button>
+        <button><a href="events-vendor.php">Login</a></button>
     </form>
 </body>
 </html>

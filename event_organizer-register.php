@@ -22,9 +22,9 @@
         <label for="phone">Contact Number:</label><br>
         <input type="text" id="phone" name="phone" required><br>
         
-        <p>Already have an account? <a href="vendor-login.php">Log in here</a></p>
+        <p>Already have an account? <a href="event_organizer-login.php">Log in here</a></p>
 
-        <input type="submit" value="Register">
+        <button><a href="events-event_organizer.php">Register</a></button>
     </form>
 </body>
 </html>

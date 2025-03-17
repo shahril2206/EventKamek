@@ -27,34 +27,7 @@
 
         <p>Already have an account? <a href="vendor-login.php">Log in here</a></p>
         
-        <input type="submit" value="Register">
+        <button><a href="events-vendor.php">Register</a></button>
     </form>
-
-    <?php
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-        $company = $_POST['company'];
-        $phone = $_POST['phone'];
-
-        // Database connection
-        $conn = new mysqli('localhost', 'username', 'password', 'database');
-
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
-
-        $sql = "INSERT INTO vendors (name, email, password, company, phone) VALUES ('$name', '$email', '$password', '$company', '$phone')";
-
-        if ($conn->query($sql) === TRUE) {
-            echo "Registration successful!";
-        } else {
-            echo "Error: " . $sql . "<br>" . $conn->error;
-        }
-
-        $conn->close();
-    }
-    ?>
 </body>
 </html>
