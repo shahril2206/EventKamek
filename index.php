@@ -63,7 +63,7 @@
                 <h2>Filter Events</h2>
                 <div class="filter-content">
                     <div class="filter-item">
-                        <label for="event-type">Event Type</label>
+                        <label for="event-type">Event Type:</label>
                         <select name="event-type" id="event-type">
                             <option value="all">All</option>
                             <option value="foodfestival">Food Festival</option>
@@ -72,14 +72,14 @@
                         </select>
                     </div>
                     <div class="filter-item">
-                        <label for="event-date">Event Date</label>
+                        <label for="event-date">Event Date</label><br>
                         <label for="event-from-date">From:</label>
-                        <input type="date" name="event-from-date" id="event-from-date">
+                        <input type="date" name="event-from-date" id="event-from-date"><br>
                         <label for="event-to-date">To:</label>
                         <input type="date" name="event-to-date" id="event-to-date">
                     </div>
                     <div class="filter-item">
-                        <label for="event-location">Event Location</label>
+                        <label for="event-location">Event Location:</label>
                         <input type="text" name="event-location" id="event-location">
                     </div>
                     <!-- Optional: Show nearby events -->
@@ -140,7 +140,7 @@
                     <h3>Contact Us</h3>
                     <p>Email: support@eventkamek.com</p>
                     <p>Phone: +60 12-345 6789</p>
-                    <p>Address: Lot 123, Jalan Event, 50000 Kuala Lumpur, Malaysia</p>
+                    <p>Address: Lot 123, Jalan Satok, 93050 Kuching, Sarawak, Malaysia</p>
                 </div>
 
                 <!-- Right: Social Media -->
