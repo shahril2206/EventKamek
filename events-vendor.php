@@ -20,8 +20,7 @@
             <div class="menu">
                 <ul>
                     <li><a href="#" class="active-page">Events</a></li>
-                    <li><a href="#">Find Vendors</a></li>
-                    <li><a href="#">Booking Requests</a></li>
+                    <li><a href="#">My Requests</a></li>
                     <li><a href="#">Vendor Assignments</a></li>
                 </ul>
             </div>
@@ -87,7 +86,7 @@
                     </div>
                     <!-- Optional: Show nearby events -->
                     <div class="filter-item">
-                        <label for="my-events">Show My Events Only</label>
+                        <label for="my-events">Show My Involvement Only</label>
                         <input type="checkbox" name="my-events" id="my-events">
                     </div>
                     <!-- Optional: Show nearby events -->

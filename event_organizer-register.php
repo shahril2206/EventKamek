@@ -15,12 +15,12 @@
         
         <label for="email">Email:</label><br>
         <input type="email" id="email" name="email" required><br>
+
+        <label for="phone">Contact Number:</label><br>
+        <input type="text" id="phone" name="phone" required><br>
         
         <label for="password">Password:</label><br>
         <input type="password" id="password" name="password" required><br>
-        
-        <label for="phone">Contact Number:</label><br>
-        <input type="text" id="phone" name="phone" required><br>
         
         <p>Already have an account? <a href="event_organizer-login.php">Log in here</a></p>
 
