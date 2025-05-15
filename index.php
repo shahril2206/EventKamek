@@ -32,7 +32,7 @@
             </div>
         </nav>
     </header>
-    <section class="main-section">
+    <section class="main-section" id="eventApp">
         <div style="display: flex; align-items: center;">
             <h1 class="heading">Events</h1>
             <button class="switch_view-btn" :class="{ active: currentView === 'list' }" @click="currentView = 'list'">List View</button>

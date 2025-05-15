@@ -1,9 +1,9 @@
 const app = Vue.createApp({
   data() {
-        return {
-        message: 'Hello Vue!',
-        };
+      return {
+        currentView: 'list' // Default view
+      };
     }
   });
 
-app.mount('#app');
+app.mount('#eventApp');
