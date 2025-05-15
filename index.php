@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/style.css?v=<?php echo time(); ?>">
     <script src="js/main.js"></script>
     <script src="https://kit.fontawesome.com/7b3b3e7b0a.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
     <title>EventKamek | Home</title>
 </head>
 <body>
@@ -34,8 +35,9 @@
     <section class="main-section">
         <div style="display: flex; align-items: center;">
             <h1 class="heading">Events</h1>
-            <button class="switch_view-btn active">List View</button>
-            <button class="switch_view-btn">Map View</button>
+            <button class="switch_view-btn" :class="{ active: currentView === 'list' }" @click="currentView = 'list'">List View</button>
+            <button class="switch_view-btn" :class="{ active: currentView === 'map' }" @click="currentView = 'map'">Map View</button>
+        </div>
         </div>
         <div class="events-container">
             <div class="events-div">
@@ -43,7 +45,7 @@
                 <div class="search-div">
                     <input type="text" name="search" id="search" placeholder="Search Events">
                 </div>
-                <div class="div-list">
+                <div class="div-list" v-if="currentView === 'list'">
                     <!-- Event 1 -->
                     <div class="event-item">
                         <div class="event-image">
@@ -57,6 +59,21 @@
                             <button class="event-btn">View Details</button>
                         </div>
                     </div>
+                </div>
+                <div class="div-list" v-if="currentView === 'map'">
+                    <!-- Event 1 -->
+                    <!-- <div class="event-item">
+                        <div class="event-image">
+                            <img src="images/event1.jpg" alt="Event 1">
+                        </div>
+                        <div class="event-details">
+                            <h2>Food Festival</h2>
+                            <p><i class="fas fa-calendar-alt"></i> 12th December 2025</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Jalan Satok, Kuching Malaysia, Malaysia</p>
+                            <p><i class="fas fa-money-bill-wave"></i> RM 20</p>
+                            <button class="event-btn">View Details</button>
+                        </div>
+                    </div> -->
                 </div>
             </div>
             <div class="filter-div">
