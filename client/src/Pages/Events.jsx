@@ -18,7 +18,7 @@ const Events = () => {
   useStickyHeaderEffect();
 
 
-  const API_BASE = import.meta.env.VITE_API_BASE;
+  let API_BASE = import.meta.env.VITE_API_BASE;
   useEffect(() => {
     const fetchEvents = async () => {
       try {
