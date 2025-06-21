@@ -1809,5 +1809,5 @@ app.get('/api/profile/public', async (req, res) => {
 
 // ========== START SERVER ==========
 app.listen(3000, () => {
-  console.log(`✅ Server running on port ${VITE_API_BASE}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
