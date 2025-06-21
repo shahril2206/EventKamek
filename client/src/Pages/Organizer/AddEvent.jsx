@@ -22,7 +22,7 @@ const AddEvent = () => {
   };
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: "AIzaSyCkyF0jgc7s-PDTcwbQwxdIbtp0YFwqUOo",
   });
 
   const [map, setMap] = useState(null);
