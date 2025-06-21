@@ -45,7 +45,7 @@ const EditProfileModal = ({ isOpen, onClose, currentData, onSave }) => {
     const role = localStorage.getItem('role');
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/profile/update`, {
+      const res = await fetch(`https://eventkamek-production.up.railway.app/api/profile/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

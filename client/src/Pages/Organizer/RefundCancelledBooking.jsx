@@ -30,7 +30,7 @@ const RefundCancelledBooking = () => {
   const handleRefundSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/removeassignment/${assignmentid}`, {
+    const res = await fetch(`https://eventkamek-production.up.railway.app/api/removeassignment/${assignmentid}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cancellationremark }),

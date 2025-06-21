@@ -44,7 +44,7 @@ const Registration = () => {
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/register`, {
+      const response = await fetch(`https://eventkamek-production.up.railway.app/api/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

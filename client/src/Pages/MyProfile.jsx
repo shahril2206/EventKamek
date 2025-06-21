@@ -22,14 +22,14 @@ const MyProfile = () => {
     const fetchProfile = async () => {
       if (role === 'organizer') {
         try {
-          const res = await fetch(`http://localhost:3000/api/organizer/myprofile?email=${encodeURIComponent(email)}`);
+          const res = await fetch(`https://eventkamek-production.up.railway.app/api/organizer/myprofile?email=${encodeURIComponent(email)}`);
           const data = await res.json();
           if (res.ok) {
             setProfile({
               name: data.organizationname,
               email: data.organizeremail,
               contactnum: data.contactnum,
-              profilePic: `http://localhost:3000/uploads/organizerPFP/${data.profilepic || 'dummyProfilePic.png'}`,
+              profilePic: `https://eventkamek-production.up.railway.app/uploads/organizerPFP/${data.profilepic || 'dummyProfilePic.png'}`,
               facebooklink: data.facebooklink || '-',
               instagramlink: data.instagramlink || '-',
               tiktoklink: data.tiktoklink || '-',
@@ -44,14 +44,14 @@ const MyProfile = () => {
         }
       } else if (role === 'vendor') {
         try {
-          const res = await fetch(`http://localhost:3000/api/vendor/myprofile?email=${encodeURIComponent(email)}`);
+          const res = await fetch(`https://eventkamek-production.up.railway.app/api/vendor/myprofile?email=${encodeURIComponent(email)}`);
           const data = await res.json();
           if (res.ok) {
             setProfile({
               name: data.vendorname,
               email: data.vendoremail,
               contactnum: data.contactnum,
-              profilePic: `http://localhost:3000/uploads/vendorPFP/${data.profilepic || 'dummyProfilePic.png'}`,
+              profilePic: `https://eventkamek-production.up.railway.app/uploads/vendorPFP/${data.profilepic || 'dummyProfilePic.png'}`,
               facebooklink: data.facebooklink || '-',
               instagramlink: data.instagramlink || '-',
               tiktoklink: data.tiktoklink || '-',
@@ -76,7 +76,7 @@ const MyProfile = () => {
       name: updatedData.name,
       email: updatedData.email,
       contactnum: updatedData.contactnum,
-      profilePic: `http://localhost:3000/uploads/vendorPFP/${updatedData.profilepic || 'dummyProfilePic.png'}`,
+      profilePic: `https://eventkamek-production.up.railway.app/uploads/vendorPFP/${updatedData.profilepic || 'dummyProfilePic.png'}`,
       facebooklink: updatedData.facebooklink || '-',
       instagramlink: updatedData.instagramlink || '-',
       tiktoklink: updatedData.tiktoklink || '-',

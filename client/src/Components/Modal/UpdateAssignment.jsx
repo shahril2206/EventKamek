@@ -19,7 +19,7 @@ const UpdateAssignment = ({
 
       const fetchAvailableBooths = async () => {
         try {
-          const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/unassigned-booths/${selectedEvent.eventid}`);
+          const res = await fetch(`https://eventkamek-production.up.railway.app/api/unassigned-booths/${selectedEvent.eventid}`);
           const data = await res.json();
 
           // Always include the currently selected boothno in the list

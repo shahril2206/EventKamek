@@ -216,7 +216,7 @@ const AddEvent = () => {
     };
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/create`, {
+      const res = await fetch(`https://eventkamek-production.up.railway.app/api/events/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

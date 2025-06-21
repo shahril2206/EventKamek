@@ -15,7 +15,7 @@ const AddAssignment = ({
       if (selectedEvent?.eventid) {
         console.log('Fetching booths for event ID:', selectedEvent.eventid); // ✅ add this
         try {
-          const res = await fetch(`http://localhost:3000/api/unassigned-booths/${selectedEvent.eventid}`);
+          const res = await fetch(`https://eventkamek-production.up.railway.app/api/unassigned-booths/${selectedEvent.eventid}`);
           const data = await res.json();
           setBooths(data.booths || []);
         } catch (err) {
@@ -59,7 +59,7 @@ const AddAssignment = ({
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/addassignments`, {
+      const res = await fetch(`https://eventkamek-production.up.railway.app/api/addassignments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

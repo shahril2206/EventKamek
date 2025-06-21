@@ -40,8 +40,8 @@ const EventDetails = () => {
         console.log('Fetched event data:', eventData);
         setEventData({
           ...eventData,
-          eventimage: `${import.meta.env.VITE_API_BASE}/uploads/eventImages/${eventData.eventimage}`, // dynamically construct the image path
-          profilepic: `${import.meta.env.VITE_API_BASE}/uploads/organizerPFP/${eventData.profilepic}`, // dynamically construct the organizer profile pic path
+          eventimage: `https://eventkamek-production.up.railway.app/uploads/eventImages/${eventData.eventimage}`, // dynamically construct the image path
+          profilepic: `https://eventkamek-production.up.railway.app/uploads/organizerPFP/${eventData.profilepic}`, // dynamically construct the organizer profile pic path
         });
       } catch (error) {
         console.error('Error fetching event:', error);
