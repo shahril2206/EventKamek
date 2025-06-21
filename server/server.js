@@ -1805,7 +1805,7 @@ app.get('/api/profile/public', async (req, res) => {
   }
 });
 
-const theport = process.env.PORT || 3000;
+const theport = process.env.PORT;
 
 // ========== START SERVER ==========
 app.listen(theport, () => {
