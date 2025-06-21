@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useState, useRef } from 'react';
-import dummyProfilePic from '../Assets/dummyProfilePic.png';
+import dummyProfilePic from '../assets/dummyProfilePic.png';
 
 const Registration = () => {
   const [role, setRole] = useState('');
