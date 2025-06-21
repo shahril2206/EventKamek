@@ -1809,5 +1809,5 @@ app.get('/api/profile/public', async (req, res) => {
 
 // ========== START SERVER ==========
 app.listen(3000, () => {
-  console.log('✅ Server running on http://localhost:3000');
+  console.log(`✅ Server running on import.meta.env.${VITE_API_BASE}`);
 });
