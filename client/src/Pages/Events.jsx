@@ -17,11 +17,12 @@ const Events = () => {
   const { token, role, email } = useContext(AuthContext);
   useStickyHeaderEffect();
 
+
+  const API_BASE = import.meta.env.VITE_API_BASE;
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch(`https://eventkamek-production.up.railway.app
-/api/events`);
+        const response = await fetch(`${API_BASE}/api/events`);
         const data = await response.json();
         setEventsData(data);
         setFilteredEvents(data); // default show all
