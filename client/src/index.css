@@ -1,0 +1,1098 @@
+@import "tailwindcss";
+
+* {
+  @apply m-0 p-0 box-border; /* Reset margin and padding for all elements */
+}
+
+html {
+  @apply h-full; /* Full height for the root element */
+}
+
+body {
+  @apply h-full bg-gray-100 text-gray-900; /* Full height for the body */
+}
+
+.Header {
+  @apply items-center px-8 bg-white shadow;
+  height: 10vh;
+  display: grid;
+  grid-template-columns: auto 1fr; /* Two columns: logo and navbar */
+  @apply pl-10 pr-15; /* Padding for the header */
+  @apply shadow-md shadow-gray-300;
+}
+
+.logo {
+  @apply justify-self-start h-15 w-auto max-h-full;
+  @apply rounded-full;
+  @apply shadow-md shadow-gray-300;
+  cursor: pointer;
+}
+
+.Navbar {
+  @apply flex items-center justify-end gap-5;
+}
+
+.Navbar_list {
+  @apply flex gap-6;
+}
+
+.Navbar_item {
+  @apply text-gray-700 hover:text-sky-600 text-base font-semibold;
+  list-style-type: none;
+  text-decoration: none;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.Navbar_link {
+  
+}
+
+.Navbar_link.active {
+  @apply text-sky-600;
+  @apply border-b-2 border-sky-600;
+}
+
+main {
+  @apply mx-auto h-full w-full bg-gray-100;
+  @apply min-h-screen;
+}
+
+.heading-container {
+  @apply flex h-auto w-full mx-auto px-12 pt-5 pb-4 items-center sticky top-0 z-50 transition-colors duration-300;
+}
+
+.heading-container h1 {
+  @apply text-2xl font-semibold text-sky-700 mr-5;
+}
+
+.heading-container .heading-btn-section {
+  @apply flex ml-auto;
+}
+
+.heading-btn-section #editEvent {
+  @apply flex items-center bg-[#15104a] text-white font-bold mx-2 px-4 text-sm rounded-lg w-auto h-10 hover:bg-gray-200 hover:text-[#15104a] cursor-pointer border-1 border-[#15104a] transition duration-300;
+}
+
+.heading-btn-section #deleteEvent {
+  @apply flex items-center bg-red-700 text-white font-bold mx-2 px-4 text-sm rounded-lg w-auto h-10 hover:bg-gray-200 hover:text-red-700 cursor-pointer border-1 border-red-700 transition duration-300;
+}
+
+.heading-btn-section .book-now-btn {
+  @apply flex items-center bg-[#15104a] text-white font-bold mx-2 px-4 text-sm rounded-lg w-auto h-10 hover:bg-gray-200 hover:text-[#15104a] cursor-pointer border-1 border-[#15104a] transition duration-300;
+}
+
+.hosted-by {
+  @apply text-gray-800 text-lg;
+}
+
+.hosted-by strong {
+  @apply text-gray-800 font-bold pl-2 cursor-pointer hover:underline;
+}
+
+.hosted-by-email {
+  @apply ml-2 px-4 py-0.5 bg-[#15104a] rounded-full text-sm text-gray-800 text-white inline-block italic cursor-pointer underline;
+}
+
+.selectViewButton {
+  @apply bg-[#15104a] text-white font-bold px-10 ml-1 mr-1 text-xs rounded-3xl h-7;
+  border: 1px solid #15104a;
+  cursor: pointer;
+  @apply transition duration-300 ease-in-out;
+}
+
+.selectViewButton:hover {
+  @apply bg-gray-200 text-[#15104a];
+  border: 1px solid #15104a;
+}
+
+.selectViewButton.active {
+  @apply bg-gray-200 text-[#15104a];
+  border: 1px solid #15104a;
+}
+
+.content-container {
+  @apply flex flex-col items-center justify-center h-full w-94/100 mx-auto mt-2 mb-5 py-5 bg-gray-200 rounded-lg;
+  @apply shadow-lg shadow-gray-200/50;
+  /* border: 1px solid black; */
+}
+
+.events-container {
+  @apply flex flex-col items-center justify-start w-full h-full;
+}
+
+.booking-container {
+  @apply flex flex-col items-center justify-start w-full h-full mt-4;
+}
+
+.event-filter-section {
+  @apply flex items-end w-96/100 h-10 rounded-lg;
+}
+
+.booking-filter-section {
+  @apply flex items-end w-92/100 h-10 rounded-lg my-2;
+}
+
+.filter-sort-panel {
+  @apply flex;
+}
+
+.filter-sort-panel div {
+  @apply flex items-center mx-2 border-b-1 h-full border-gray-600 px-1 pb-2 text-sm hover:text-[#15104a] hover:cursor-pointer hover:bg-[#fefefe];
+}
+
+.filter-sort-panel div label {
+  cursor: pointer;
+}
+
+.filter-sort-panel div input {
+  cursor: pointer;
+}
+
+.filter-sort-panel div input[type="checkbox"] {
+  @apply ml-2;
+}
+
+.filter-sort-panel div select {
+  cursor: pointer;
+}
+
+.event-date-filter {
+  @apply rounded-3xl;
+}
+
+.event-searchbar {
+  @apply w-17/100 h-full bg-[#fefefe] rounded-lg px-3 border-1 border-gray-300;
+}
+
+.event-searchbar-wide {
+  @apply w-28/100 h-full bg-[#fefefe] rounded-lg px-3 border-1 border-gray-300
+}
+
+.booking-searchbar {
+  @apply w-99/200 h-full bg-[#fefefe] rounded-lg px-3 border-1 border-gray-300;
+}
+
+.eventbooth-searchbar {
+  @apply w-38/200 h-full bg-[#fefefe] rounded-lg px-3 border-1 border-gray-300;
+}
+
+.booth-searchbar {
+  @apply mt-3 mb-2 w-full h-10 bg-[#fefefe] rounded-lg px-3 border-1 border-gray-300;
+}
+
+.mybooth-searchbar {
+  @apply w-30/100 h-10 bg-[#fefefe] rounded-lg px-3 border-1 border-gray-300;
+}
+
+.apply-filter-btn {
+  @apply bg-[#15104a] text-white font-bold px-4 ml-1 mr-1 text-xs rounded-lg w-auto h-full hover:bg-gray-200 hover:text-[#15104a];
+  border: 1px solid #15104a;
+  cursor: pointer;
+}
+
+.reset-filter-btn {
+  @apply bg-[#fefefe] text-gray-700 font-bold px-4 ml-1 mr-1 text-xs rounded-lg w-auto h-full border-b-1 hover:bg-gray-200 hover:border-1;
+  cursor: pointer;
+}
+
+.booking-reset-filter-btn {
+  @apply bg-gray-200 text-gray-700 font-bold px-4 ml-1 mr-1 text-xs rounded-lg w-auto h-full border-b-1 hover:bg-gray-200 hover:border-1;
+  cursor: pointer;
+}
+
+.events-map {
+  @apply w-96/100 h-auto rounded-lg mt-6 border-1 border-gray-400;
+}
+
+.events-list {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-center w-96/100 h-auto rounded-lg mt-6;
+  /* border: 1px solid black; */
+}
+
+.event-card {
+  @apply flex items-center justify-start w-full h-50 bg-[#fefefe] rounded-lg px-3 mb-2 hover:shadow-xl hover:shadow-gray-400/50 transition-shadow duration-300 ease-in-out;
+  @apply shadow-lg shadow-gray-200/50;
+  cursor: pointer;
+  /* border: 1px solid black; */
+}
+
+.event-card img {
+  @apply w-45 h-45 rounded-lg;
+}
+
+.event-card-details {
+  @apply flex flex-col justify-start w-full h-full ml-3 py-2;
+}
+
+.event-card-details-header {
+  @apply flex flex-col w-full italic;
+}
+
+.event-card-details-header h2 {
+  @apply text-xl font-semibold text-[#15104a];
+}
+.event-card-details-header p {
+  @apply text-gray-500 justify-end flex-1 text-sm;
+}
+
+.event-card-details-body {
+  @apply flex flex-col gap-1 mt-3 text-sm;
+}
+
+.event-details-container {
+  @apply grid w-92/100 h-full;
+  grid-template-columns: 1fr 1fr;
+}
+
+.event-details-left {
+  @apply pr-10 pb-5;
+}
+
+.event-details-left img {
+  @apply rounded-lg object-cover w-full mb-5 border-1 border-gray-300 shadow-lg shadow-gray-200/50;
+  max-height: 400px;
+  height: auto;
+}
+
+.event-details-right {
+  @apply pl-3 rounded-lg shadow-gray-200/50 shadow-lg h-fit;
+}
+
+.event-details-venue-date {
+  @apply bg-[#f7f5f5] rounded-lg p-5 shadow-gray-200/50 shadow-lg h-fit;
+}
+
+.event-details-right .date {
+  @apply flex mb-3;
+}
+
+.event-details-right .date h3 {
+  @apply font-bold underline;
+}
+
+.event-details-right .date p {
+  @apply ml-3;
+}
+
+.event-details-right .location h3 {
+  @apply font-bold underline;
+}
+
+.event-details-vendor-section {
+  @apply mt-10;
+}
+
+.event-details-vendor-heading {
+  @apply flex items-center justify-between mb-3;
+}
+
+.event-details-organizer {
+  @apply flex items-center gap-4;
+}
+
+.organizer-card {
+  @apply grid items-center bg-[#fefefe] h-17 w-fit pl-2 pr-5 rounded-md border-1 border-gray-200 shadow cursor-pointer;
+  grid-template-columns: auto auto;
+}
+
+.organizer-card img {
+  @apply w-13 h-13 object-cover rounded-full mr-3 border-1 border-gray-300 shadow my-auto;
+}
+
+.event-details-vendor-section h2, .event-details-left h2{
+  @apply font-bold underline text-[#15104a] mb-1;
+}
+
+.event-details-map {
+  @apply mt-5 h-full w-full rounded-md border-1 border-gray-400;
+}
+
+.hovering-button-container {
+  @apply fixed bottom-8 left-1/2 transform -translate-x-1/2 h-12;
+}
+
+.hovering-button {
+  @apply bg-[#15104a] text-white font-bold px-6 mx-1 text-lg rounded-3xl w-auto h-full hover:bg-gray-200 hover:text-[#15104a] cursor-pointer border-[#15104a] border-1;
+  @apply shadow-lg shadow-gray-400/50 transition duration-300 ease-in-out;
+}
+
+.booking-requests-container {
+  @apply grid w-94/100 h-full mx-auto my-2;
+  grid-template-columns: 1fr 1fr;
+}
+
+.booking-request-card {
+  @apply mx-auto w-full bg-[#fefefe] rounded-lg p-3 border-gray-300 border-1 shadow-lg shadow-gray-200/50 cursor-pointer hover:shadow-xl hover:shadow-gray-400/50 transition-shadow duration-300 ease-in-out;
+}
+
+.booking-request-card .heading {
+  @apply flex items-center justify-between w-full mb-2 font-bold text-lg text-[#15104a] underline;
+}
+
+.vendor-list {
+  @apply mt-3;
+}
+
+.vendor-card {
+  @apply w-full bg-[#fefefe] rounded-lg px-3 py-3 mb-2 hover:shadow-xl hover:shadow-gray-400/50 transition-shadow duration-300 ease-in-out;
+  @apply shadow-lg shadow-gray-200/50;
+}
+
+.vendor-card-header {
+  @apply border-b-1 border-gray-300 mb-2;
+}
+
+.vendor-card-header h3 {
+  @apply text-base font-semibold text-[#15104a];
+}
+
+.my-events-list, .my-booths-list {
+  @apply w-96/100 my-5;
+}
+
+.my-events-table {
+  @apply w-full bg-[#fefefe] rounded-lg shadow-lg shadow-gray-200/50 mt-3;
+  border-collapse: collapse;
+}
+
+.my-events-table th, .my-events-table td {
+  @apply border-b-1 border-gray-300 p-3 text-left;
+}
+
+.events-table-link {
+  @apply font-bold mr-2 text-sm items-center w-auto h-full border-b-1 border-[#15104a] hover:bg-gray-200 hover:text-[#15104a] transition duration-300;
+}
+
+.my-events-list td {
+  @apply cursor-pointer;
+}
+
+.profile-events td {
+  @apply cursor-pointer;
+}
+
+.fully-booked-td {
+  @apply text-red-600;
+}
+
+.upcoming-event-td {
+  @apply text-green-600 font-semibold;
+}
+
+.ongoing-event-td {
+  @apply text-yellow-600 font-semibold;
+}
+
+.past-event-td {
+  @apply text-red-600 font-semibold line-through;
+}
+
+.booth-event-details {
+  @apply w-96/100 h-full mx-auto;
+}
+
+.booth-list {
+  @apply w-96/100 h-full mx-auto my-2;
+}
+
+.booth-table {
+  @apply w-full bg-[#fefefe] rounded-lg shadow-lg shadow-gray-200/50 mt-3;
+  border-collapse: collapse;
+}
+
+.booth-table tbody tr {
+  @apply hover:bg-gray-100 transition duration-300 ease-in-out;
+}
+
+.booth-table th, .booth-table td {
+  @apply border-b-1 border-gray-300 p-3 text-left;
+}
+
+.booth-table .booth-assign-btn {
+  @apply bg-green-700 text-white font-bold px-3 py-1 text-xs rounded-sm w-auto h-full border-1 border-green-700 hover:bg-gray-200 hover:text-green-700 transition duration-300;
+  cursor: pointer;
+}
+
+.booth-table .booth-unassign-btn {
+  @apply bg-red-700 text-white font-bold px-3 py-1 text-xs rounded-sm w-auto h-full border-1 border-red-700 hover:bg-gray-200 hover:text-red-700 transition duration-300;
+  cursor: pointer;
+}
+
+.booth-table .booth-edit-btn {
+  @apply bg-[#15104a] text-white font-bold px-3 py-1 mr-1 text-xs rounded-sm w-auto h-full border-1 border-[#15104a] hover:bg-gray-200 hover:text-[#15104a] transition duration-300;
+  cursor: pointer;
+}
+
+.booth-table .depo-settled-view-btn {
+  @apply font-bold px-3 py-1 mr-1 px-2 rounded-xs text-xs rounded-sm w-auto h-full border-b-1 border-[#15104a] hover:bg-gray-200 transition duration-300 cursor-pointer;
+}
+
+.booth-booking-requests-summary {
+  @apply w-96/100 h-full mx-auto mt-7 mb-5 pl-2;
+}
+
+.view-pending-request {
+  @apply bg-[#15104a] text-white font-bold mx-3 px-2 py-2 text-base rounded-sm w-auto h-full border-1 border-[#15104a] cursor-pointer hover:bg-gray-200 hover:text-[#15104a] transition duration-300 ease-in-out;
+}
+
+.booth-view-details {
+  @apply text-[#15104a] underline cursor-pointer;
+}
+
+.add-event-form-container {
+  @apply h-full w-full mx-auto bg-gray-200 border-1 border-gray-400;
+  @apply shadow-md shadow-green-700/50;
+}
+
+.add-event-form-container h1 {
+  @apply flex items-center text-2xl border-b-1 border-green-800 shadow-green-700 shadow-xs font-semibold text-green-700 mb-6 px-12 py-2 text-center;
+  @apply sticky top-0 z-50 bg-[#fefefe];
+}
+
+.add-event-form {
+  @apply grid grid-cols-2 px-6 pb-3;
+}
+
+.add-event-form .left {
+  @apply w-full;
+}
+
+.add-event-form .right {
+  @apply w-full;
+}
+
+.add-event-form .event-datetime {
+  @apply grid grid-cols-3;
+  grid-template-columns: 1fr auto 1fr;
+}
+
+.add-event-form .event-datetime p {
+  @apply font-bold text-3xl
+}
+
+.add-event-form label {
+  @apply block text-base font-semibold text-[#15104a];
+}
+
+.add-event-form input {
+  @apply w-full h-8 mb-4 px-3 border-b-2 border-gray-400;
+  @apply focus:outline-none focus:ring-1 focus:ring-green-700;
+  @apply disabled:bg-gray-300 disabled:text-gray-300 disabled:cursor-not-allowed;
+}
+
+.add-event-form input[type="checkbox"] {
+  @apply block !w-fit !h-fit ml-2 cursor-pointer my-auto;
+}
+
+.edit-event-form input[type="checkbox"] {
+  @apply block !w-fit !h-fit ml-2 cursor-pointer my-auto;
+}
+
+.required {
+  @apply text-red-600;
+}
+
+.add-event-form textarea {
+  @apply w-full mb-2 px-3 border-2 border-gray-400;
+  @apply focus:outline-none focus:ring-1 focus:ring-green-700;
+}
+
+.add-event-form .preview-image {
+  @apply w-full mt-2 mb-6 border-1 border-green-800;
+  @apply object-cover;
+}
+
+.add-event-form .form-map-container {
+  @apply w-full border-1 border-green-700;
+}
+
+.add-event-form .remove-image-btn {
+  @apply absolute top-1 right-1 bg-red-600 text-xl font-bold text-white border-2 border-gray-900 rounded-full w-6 h-6 cursor-pointer flex items-center justify-center leading-none;
+  @apply shadow-lg shadow-gray-400/50;
+}
+
+.add-event-form .buttons-container {
+  @apply flex gap-2;
+}
+
+.add-event-form .buttons-container button {
+  @apply bg-green-800 text-white font-bold px-6 text-base rounded-lg w-auto h-10 hover:bg-gray-200 hover:text-green-700 cursor-pointer border-1 border-green-800 transition duration-300;
+}
+
+.limit-each-cat {
+  @apply flex;
+}
+
+.event-info-div, .booking-purposes-info-div {
+  @apply w-full mx-auto px-6 shadow-lg shadow-gray-200/50;
+}
+
+.event-info-div {
+  @apply border-r-1 border-gray-700 !pr-10;
+}
+
+.booking-purposes-info-div {
+  @apply border-l-1 border-gray-300 !pl-10;
+}
+
+.event-info-div h2, .booking-purposes-info-div h2 {
+  @apply text-xl text-center font-semibold text-[#15104a] mb-4 border-b-1 border-gray-300;
+}
+
+.edit-event-form-container {
+  @apply h-full w-full mx-auto bg-gray-200 border-1 border-gray-400;
+  @apply shadow-md shadow-[#15104a];
+}
+
+.edit-event-form-container h1 {
+  @apply flex items-center bg-[#fefefe] text-2xl border-b-1 border-[#15104a] shadow-[#15104a] shadow-xs font-semibold text-[#15104a] mb-6 px-12 py-2 text-left;
+  @apply sticky top-0 z-50;
+}
+
+.edit-event-form {
+ @apply grid grid-cols-2 px-6 pb-3;
+}
+
+.edit-event-form .left {
+  @apply w-full;
+}
+
+.edit-event-form .right {
+  @apply w-full;
+}
+
+.edit-event-form .event-datetime {
+  @apply grid grid-cols-3;
+  grid-template-columns: 1fr auto 1fr;
+}
+
+.edit-event-form .event-datetime p {
+  @apply font-bold text-3xl
+}
+
+.edit-event-form label {
+  @apply block text-base font-semibold text-[#15104a];
+}
+
+.edit-event-form input {
+  @apply w-full h-8 mb-4 px-3 border-b-2 border-gray-400;
+  @apply focus:outline-none focus:ring-1 focus:ring-[#15104a];
+  @apply disabled:bg-gray-300 disabled:text-gray-300 disabled:cursor-not-allowed;
+}
+
+.edit-event-form textarea {
+  @apply w-full mb-2 px-3 border-2 border-gray-400;
+  @apply focus:outline-none focus:ring-1 focus:ring-[#15104a];
+}
+
+.edit-event-form .preview-image {
+  @apply w-full mt-2 mb-6 border-1 border-[#15104a];
+  @apply object-cover;
+}
+
+.edit-event-form .form-map-container {
+  @apply w-full border-1 border-[#15104a];
+}
+
+.edit-event-form .remove-image-btn {
+  @apply absolute top-1 right-1 bg-red-600 text-xl font-bold text-white border-2 border-gray-900 rounded-full w-6 h-6 cursor-pointer flex items-center justify-center leading-none;
+  @apply shadow-lg shadow-gray-400/50;
+}
+
+.edit-event-form .buttons-container {
+  @apply flex gap-2;
+}
+
+.edit-event-form .buttons-container button {
+  @apply bg-[#15104a] text-white font-bold px-6 text-base rounded-lg w-auto h-10 hover:bg-gray-200 hover:text-[#15104a] cursor-pointer border-1 border-[#15104a] transition duration-300;
+}
+
+.delete-event-modal {
+  @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[30%] max-w-[50%] h-[30%] max-h-[50%] bg-white px-8 py-3 mx-auto rounded-[12px] overflow-auto z-60;
+}
+
+.delete-event-modal h2 {
+  @apply text-xl font-bold text-red-700 my-4 text-center;
+}
+
+.delete-event-modal .event-title {
+  @apply text-xl;
+}
+
+.delete-event-modal .event-date {
+  @apply text-base text-gray-600 mb-2;
+}
+
+.delete-event-modal .modal-buttons {
+  @apply mt-6;
+}
+
+.delete-event-modal .modal-buttons #confirmDelete {
+  @apply bg-red-700 text-white font-bold px-6 text-base rounded-lg w-auto h-10 hover:bg-gray-200 hover:text-red-700 cursor-pointer border-1 border-red-700 transition duration-300;
+}
+
+.delete-event-modal .modal-buttons #cancelDelete {
+  @apply bg-gray-200 text-gray-700 font-bold px-6 text-base rounded-lg w-auto h-10 hover:bg-gray-300 hover:text-gray-900 cursor-pointer border-1 border-gray-800 transition duration-300;
+}
+
+.profile-details {
+  @apply grid w-96/100 h-full mx-auto px-5 gap-8 mt-3;
+  grid-template-columns: 1fr 3.5fr 1.5fr;
+}
+
+.profile-picture {
+  @apply rounded-full border-1 shadow-lg shadow-gray-200/50 ml-2;
+}
+
+.profile-info {
+  @apply flex flex-col justify-start items-start px-5;
+}
+
+.profile-info h2 {
+  @apply text-2xl font-bold text-[#15104a] underline mb-3;
+}
+
+.profile-info p {
+  @apply flex items-center text-lg my-1 ml-2;
+}
+
+.profile-button-container {
+  @apply flex justify-end mr-3;
+}
+
+.profile-aboutus {
+  @apply w-96/100 px-10 mt-5 mb-3;
+}
+
+.profile-aboutus h2 {
+  @apply text-xl font-semibold text-[#15104a] mb-3;
+}
+
+.profile-aboutus p {
+  @apply text-base;
+}
+
+.edit-profile-btn {
+  @apply bg-[#15104a] text-white font-bold px-6 mx-1 text-xs rounded-3xl w-auto h-7 hover:bg-gray-200 hover:text-[#15104a] cursor-pointer border-1 border-[#15104a];
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.change-password-btn {
+  @apply bg-[#15104a] text-white font-bold px-6 mx-1 text-xs rounded-3xl w-auto h-7 hover:bg-gray-200 hover:text-[#15104a] cursor-pointer border-1 border-[#15104a];
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.profile-events, .myprofile-events {
+  @apply w-96/100 px-10 mt-5 mb-3;
+}
+
+.profile-events-header {
+  @apply flex items-center justify-between mb-6;
+}
+
+.profile-events h2, .myprofile-events h2 {
+  @apply text-xl font-semibold text-[#15104a];
+}
+
+.profile-events .view-all-events, .myprofile-events .view-all-events, .event-details-vendor-heading .view-all-events {
+  @apply font-bold px-6 mx-1 text-xs w-auto h-7 hover:bg-[#fefefe] hover:rounded-3xl hover:text-[#15104a] cursor-pointer border-b-1 border-[#15104a] transition duration-300 ease-in-out;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.payment-info-section {
+  @apply bg-[#fefefe] border-1 border-gray-200 w-fit h-auto rounded-md px-4 py-2;
+  @apply shadow-gray-300 shadow-sm;
+}
+
+.payment-info-section strong {
+  @apply font-semibold;
+}
+
+.profile-events .add-event-container, .myprofile-events .add-event-container {
+  @apply flex items-center justify-start mt-6;
+}
+
+.profile-events .add-event-btn, .myprofile-events .add-event-btn {
+  @apply bg-[#15104a] text-white font-bold px-6 text-base rounded-lg w-auto h-10 hover:bg-gray-200 hover:text-[#15104a] cursor-pointer border-1 border-[#15104a];
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.back-btn {
+  @apply bg-[#15104a] text-white font-bold px-6 mt-4 mx-8 text-xs rounded-sm w-auto h-7 hover:bg-gray-200 hover:text-[#15104a] cursor-pointer border-1 border-[#15104a];
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.login-form-container {
+  @apply h-full w-40/100 mx-auto my-15 py-5 rounded-xl bg-[#fefefe] border-1 border-gray-300;
+  @apply shadow-lg shadow-gray-400/50;
+}
+
+.signup-form-container {
+  @apply h-full w-40/100 mx-auto my-3 py-5 rounded-xl bg-[#fefefe] border-1 border-gray-300;
+  @apply shadow-lg shadow-gray-400/50;
+}
+
+.login-form-container form, .signup-form-container form {
+  @apply mx-auto w-80/100 h-full flex flex-col justify-center bg-[#fefefe];
+}
+
+.login-form-container h1, .signup-form-container h1 {
+  @apply text-2xl font-semibold text-[#15104a] mb-5 text-center;
+}
+
+.login-form-container form input, .login-form-container form select, .signup-form-container form input, .signup-form-container form select {
+  @apply w-full h-10 mb-4 px-3 border-1 border-gray-300 rounded-lg;
+  @apply focus:outline-none focus:ring-1 focus:ring-[#15104a];
+}
+
+.login-form-container form select, .signup-form-container form select {
+  @apply cursor-pointer;
+}
+
+.login-form-container form button, .signup-form-container form button {
+  @apply mt-5 mb-3 bg-[#15104a] text-white font-bold px-6 text-base rounded-lg w-full h-10 hover:bg-gray-200 hover:text-[#15104a] cursor-pointer border-1 border-[#15104a];
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.signup-link, .login-link {
+  @apply text-base font-semibold underline text-[#15104a] cursor-pointer;
+}
+
+/* Add to your CSS */
+.modal-backdrop {
+  @apply fixed top-0 left-0 w-full h-full bg-black flex items-center justify-center z-55;
+  opacity: 0.6;
+}
+
+.booking-modal {
+  @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[40%] max-w-[95%] h-fit max-h-[95%] bg-white px-8 py-3 mx-auto rounded-[12px] overflow-auto z-60;
+}
+
+.booking-modal form {
+  @apply flex flex-col w-full;
+}
+
+.booking-modal .booking-info {
+  @apply mb-2
+}
+
+.booking-modal .contact-info {
+  @apply mt-2
+}
+
+.booking-form-heading {
+  @apply flex items-center mb-2;
+}
+
+.booking-modal h2 {
+  @apply flex text-2xl font-bold text-[#15104a] text-center;
+}
+
+.booking-modal input, .booking-modal select{
+  @apply w-full px-3 py-1 mb-2 border-1 border-gray-300 rounded-lg;
+}
+
+.booking-modal textarea {
+  @apply w-full p-3 border-1 mb-2 border-gray-300 rounded-lg;
+}
+
+.booking-modal form .modal-buttons {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.booking-response-modal, .assignment-modal {
+  @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[40%] max-w-[95%] h-fit max-h-[95%] bg-white px-8 py-3 mx-auto rounded-[12px] overflow-auto z-60;
+}
+
+.booking-response-modal form, .assignment-modal form{
+  @apply flex flex-col w-full;
+}
+
+.booking-response-form-heading , .assignment-form-heading{
+  @apply flex items-center;
+}
+
+.booking-response-modal h2 , .assignment-modal h2{
+  @apply flex text-2xl font-bold text-[#15104a] text-center;
+}
+
+.booking-response-modal .info-section , .assignment-modal .info-section{
+  @apply bg-gray-100 border-1 border-gray-500 rounded-md px-4 pt-4 pb-3 mb-3 text-base text-gray-800;
+}
+
+.booking-response-modal h3 , .assignment-modal h3{
+  @apply relative top-3 left-3 w-fit text-base font-semibold text-[#15104a] bg-[#fefefe] rounded-xl px-2;
+}
+
+.booking-response-modal .info-section p, .assignment-modal .info-section p {
+  @apply mb-1
+}
+
+.booking-response-modal .info-section input, .booking-response-modal .info-section select , .assignment-modal .info-section input, .assignment-modal .info-section select{
+  @apply w-full border-1 border-gray-600 mt-1 mb-3;
+}
+
+.booking-response-modal .info-section select,  .assignment-modal .info-section select {
+  cursor: pointer;
+}
+
+.assignment-modal .info-section textarea {
+  @apply w-full border-1 border-gray-600 mt-2 px-1;
+}
+
+.booking-response-modal .info-section input, .booking-response-modal .info-section select {
+  @apply font-semibold;
+}
+
+.booking-response-modal .modal-buttons .approve-btn {
+  @apply bg-green-800 border-green-800 hover:bg-gray-200 hover:text-green-800;
+}
+
+.assignment-modal .modal-buttons .reassign-btn {
+  @apply bg-[#15104a] border-green-800 hover:bg-gray-200 hover:text-[#15104a];
+}
+
+.booking-response-modal .modal-buttons .reject-btn {
+  @apply bg-red-800 border-red-800 hover:bg-gray-200 hover:text-red-800;
+}
+
+.booking-response-modal .modal-buttons .cancel-btn, .assignment-modal .modal-buttons .cancel-btn {
+  @apply bg-gray-500 border-gray-500 hover:bg-gray-300 hover:text-gray-900;
+}
+
+.assignment-modal .modal-buttons .to-refund-btn {
+  @apply bg-red-800 border-red-800 hover:bg-gray-300 hover:text-red-800;
+}
+
+.edit-profile-modal-box {
+  @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-[90%] h-[100%] max-h-[95%] bg-white px-8 py-3 mx-auto rounded-[12px] overflow-auto z-60;
+}
+
+.edit-profile-modal-box form {
+  @apply grid grid-cols-2 py-3;
+}
+
+.edit-profile-modal-box h2 {
+  @apply text-2xl font-bold text-[#15104a] mb-5;
+}
+
+.edit-profile-modal-box input {
+  @apply w-full p-3 mb-3 border-1 border-gray-300 rounded-lg;
+}
+
+.edit-profile-modal-box textarea {
+  @apply w-full p-3 mb-3.5 border-1 border-gray-300 rounded-lg;
+}
+
+.modal-buttons {
+  @apply flex gap-2.5 mt-4;
+}
+
+.modal-buttons button {
+  @apply bg-[#15104a] text-white font-bold px-6 text-base rounded-lg w-auto h-10 hover:bg-gray-200 hover:text-[#15104a] cursor-pointer border-1 border-[#15104a] transition duration-300;
+}
+
+.cancel-form {
+  @apply !bg-[#fefefe] !text-gray-700 font-bold px-6 mx-1 text-xs !border-b-1 w-auto h-7 hover:!bg-gray-300 cursor-pointer !border-gray-800 transition duration-300;
+}
+
+.delete-event-modal {
+  @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[30%] max-w-[50%] h-[30%] max-h-[50%] bg-white px-8 py-3 mx-auto rounded-[12px] overflow-auto z-60;
+}
+
+.edit-profile-left {
+ @apply w-96/100;
+}
+
+.edit-profile-right {
+ @apply w-96/100 mx-auto;
+}
+
+.edit-profile-left img {
+  @apply w-40 h-40 rounded-full border-1 border-gray-300 shadow-lg shadow-gray-200/50;
+  @apply mx-auto;
+}
+
+.close-modal-btn {
+  @apply ml-auto font-bold text-3xl cursor-pointer;
+}
+
+.unassigned-vendors-section {
+  @apply w-96/100 mt-10 mb-2;
+}
+
+.unassigned-vendors-heading {
+  @apply text-xl font-semibold text-[#15104a] mb-3 border-b-1;
+}
+
+.toggle-auto-assign {
+  @apply flex items-center mt-2 gap-2;
+  @apply justify-end w-[65%]
+}
+
+.toggle-switch {
+  width: 40px;
+  height: 20px;
+  appearance: none;
+  background: #ccc;
+  border-radius: 20px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.3s ease;
+}
+
+.toggle-switch:checked {
+  background: #15104a;
+}
+
+.toggle-switch::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 1px;
+  left: 1px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.3s ease;
+}
+
+.toggle-switch:checked::before {
+  transform: translateX(20px);
+}
+
+.event-infowindow {
+  @apply p-2;
+}
+
+.event-infowindow p {
+  @apply mb-2 text-black;
+}
+
+.event-infowindow h3 {
+  @apply flex mb-4 justify-between items-center;
+}
+
+.event-infowindow .status {
+  @apply italic text-xs items-center text-gray-500 ml-1;
+}
+
+.event-infowindow p strong {
+  @apply font-semibold;
+}
+
+.event-infowindow .organizer-clickable {
+  @apply text-blue-700 cursor-pointer hover:underline font-semibold;
+}
+
+.event-infowindow .view-event-link {
+  display: inline-block;
+  @apply flex flex-col mt-4 mb-1 text-xs font-bold px-2 py-1 items-center text-center border-2;
+  @apply transition duration-300 ease-in-out;
+  @apply hover:bg-gray-300 hover:shadow-md;
+}
+
+.calendar-wrapper {
+  @apply w-full;
+}
+
+.calendar-wrapper .month-year-heading {
+  @apply flex flex-col text-xl text-[#15104a] w-48 font-bold justify-end border-b-2 border-[#15104a];
+}
+
+.calendar-controls {
+  @apply flex justify-between;
+}
+
+.calendar-controls button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  @apply cursor-pointer mt-1 border-1 border-[#15104a] bg-[#15104a] text-[#fefefe];
+  @apply hover:bg-[#fefefe] hover:text-[#15104a] border-[#15104a] transition-colors duration-300 ease-in-out;
+}
+
+.goto-currentMonth {
+  @apply !border-2 !bg-transparent !text-black;
+  @apply hover:!bg-gray-300;
+  @apply !ml-0;
+}
+
+.calendar-table {
+  border-collapse: collapse;
+  @apply mt-2 w-full;
+}
+
+.calendar-table th,
+.calendar-table td {
+  vertical-align: top;
+  @apply border-1 border-gray-700;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  width: 195px;
+  height: 100px;
+}
+
+.td-other-month {
+  background-color: #ccc;
+}
+
+.calendar-table th {
+  @apply !h-fit bg-[#fefefe];
+}
+
+.td-day h3 {
+  @apply text-xs border-b-1 bg-[#fefefe] text-center;
+}
+
+.td-day button {
+  @apply bg-[#fefefe] text-black text-xs text-left border-1 border-[#fefefe] my-2 mx-1 p-1 cursor-pointer w-[95%];
+  @apply shadow-md shadow-gray-300;
+  @apply hover:shadow-lg hover:border-gray-700 hover:shadow-gray-400 transition duration-300 ease-in-out;
+}
+
+Footer {
+  @apply w-full text-center py-4 mt-auto;
+}
+
+
+/* h1, h2, h3, h4, h5, h6 {
+  @apply font-sans font-bold;
+}
+h1 {
+  @apply text-3xl;
+}
+h2 {
+  @apply text-2xl;
+}
+h3 {
+  @apply text-xl;
+}
+h4 {
+  @apply text-lg;
+}
+h5 {
+  @apply text-base;
+}
+h6 {
+  @apply text-sm;
+}
+p {
+  @apply text-base;
+}
+a {
+  @apply text-blue-600 hover:text-blue-800;
+}
+button {
+  @apply bg-blue-600 text-white font-bold py-2 px-4 rounded;
+}
+input, textarea {
+  @apply border border-gray-300 rounded p-2;
+}
+ul, ol {
+  @apply list-disc pl-5;
+}
+li {
+  @apply mb-2;
+} */
