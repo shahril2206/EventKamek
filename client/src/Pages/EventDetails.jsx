@@ -35,7 +35,7 @@ const EventDetails = () => {
     const fetchEvent = async () => {
       const slug = window.location.pathname.split('/').pop();
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/${slug}`);
+        const response = await fetch(`https://eventkamek-production.up.railway.app/api/events/${slug}`);
         const eventData = await response.json();
         console.log('Fetched event data:', eventData);
         setEventData({
