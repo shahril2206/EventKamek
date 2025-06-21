@@ -17,12 +17,10 @@ const Events = () => {
   const { token, role, email } = useContext(AuthContext);
   useStickyHeaderEffect();
 
-
-  let API_BASE = import.meta.env.VITE_API_BASE;
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch(`${API_BASE}/api/events`);
+        const response = await fetch(`${process.env.VITE_API_BASE}/api/events`);
         const data = await response.json();
         setEventsData(data);
         setFilteredEvents(data); // default show all
