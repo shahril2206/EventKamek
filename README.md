@@ -20,3 +20,5 @@ JWT_SECRET
 
 EMAIL_USER
 EMAIL_PASS
+
+You may import the EventKamek.sql in this repository into your DBMS
