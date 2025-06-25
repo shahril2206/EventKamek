@@ -20,7 +20,7 @@ const Events = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch(`https://eventkamek-production.up.railway.app/api/events`);
+        const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/events`);
         const data = await response.json();
         setEventsData(data);
         setFilteredEvents(data); // default show all

@@ -26,7 +26,7 @@ const EventDetails = () => {
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: "AIzaSyCkyF0jgc7s-PDTcwbQwxdIbtp0YFwqUOo",
+    googleMapsApiKey: `${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`,
   });
 
   const { slug } = useParams();
@@ -35,13 +35,13 @@ const EventDetails = () => {
     const fetchEvent = async () => {
       const slug = window.location.pathname.split('/').pop();
       try {
-        const response = await fetch(`https://eventkamek-production.up.railway.app/api/events/${slug}`);
+        const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/${slug}`);
         const eventData = await response.json();
         console.log('Fetched event data:', eventData);
         setEventData({
           ...eventData,
-          eventimage: `https://eventkamek-production.up.railway.app/uploads/eventImages/${eventData.eventimage}`, // dynamically construct the image path
-          profilepic: `https://eventkamek-production.up.railway.app/uploads/organizerPFP/${eventData.profilepic}`, // dynamically construct the organizer profile pic path
+          eventimage: `${import.meta.env.VITE_API_BASE}/uploads/eventImages/${eventData.eventimage}`, // dynamically construct the image path
+          profilepic: `${import.meta.env.VITE_API_BASE}/uploads/organizerPFP/${eventData.profilepic}`, // dynamically construct the organizer profile pic path
         });
       } catch (error) {
         console.error('Error fetching event:', error);

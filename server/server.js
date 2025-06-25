@@ -1805,9 +1805,7 @@ app.get('/api/profile/public', async (req, res) => {
   }
 });
 
-const theport = process.env.PORT;
-
 // ========== START SERVER ==========
-app.listen(theport, () => {
-  console.log(`✅ Server running on port ${theport}`);
+app.listen(3000, () => {
+  console.log('✅ Server running on port:3000');
 });

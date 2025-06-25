@@ -12,7 +12,7 @@ const containerStyle = {
 const EventMap = ({ events }) => {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: "AIzaSyCkyF0jgc7s-PDTcwbQwxdIbtp0YFwqUOo",
+    googleMapsApiKey: `${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`,
   });
 
   const [selectedMarker, setSelectedMarker] = useState(null);
@@ -78,7 +78,7 @@ const EventMap = ({ events }) => {
             </h3>
             <div className="flex">
               <div className="!mr-3">
-                <img src={`https://eventkamek-production.up.railway.app/uploads/eventImages/${selectedMarker.eventimage}`} alt="event image" className="w-25 rounded-lg" />
+                <img src={`${import.meta.env.VITE_API_BASE}/uploads/eventImages/${selectedMarker.eventimage}`} alt="event image" className="w-25 rounded-lg" />
               </div>
               <div>
                 <p><strong>Organizer:</strong> <span className="organizer-clickable">{selectedMarker.organizationname}</span></p>

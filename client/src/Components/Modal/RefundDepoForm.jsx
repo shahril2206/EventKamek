@@ -54,7 +54,7 @@ const RefundDepoForm = ({
       navigate('/RefundDeposit', { state: refundInfo });
     } else if (depositAction === "Forfeit") {
       try {
-        const res = await fetch(`https://eventkamek-production.up.railway.app/api/forfeitdeposit/${assignmentid}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/forfeitdeposit/${assignmentid}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
