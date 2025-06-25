@@ -12,7 +12,7 @@ const MyBoothTable = ({ filter }) => {
   useEffect(() => {
     const fetchBooths = async () => {
       try {
-        const res = await fetch(`https://eventkamek-production.up.railway.app/api/mybooths/${vendoremail}`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/mybooths/${vendoremail}`);
         const text = await res.text();
         console.log('📦 Raw response:', text);
 

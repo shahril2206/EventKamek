@@ -8,7 +8,7 @@ const VendorList = ({ eventId, isTheOrganizer }) => {
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const res = await fetch(`https://eventkamek-production.up.railway.app/api/eventvendors/${eventId}`);
+        const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/eventvendors/${eventId}`);
         const data = await res.json();
         setVendors(data.vendors || []);
       } catch (error) {

@@ -25,7 +25,7 @@ const EventBooths = () => {
     const fetchEventBoothDetails = async () => {
       try {
         // Step 1: Get eventId using slug
-        const slugRes = await fetch(`https://eventkamek-production.up.railway.app/api/events/${slug}`);
+        const slugRes = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/${slug}`);
         const slugData = await slugRes.json();
 
         if (!slugRes.ok) throw new Error(slugData.error || "Failed to fetch event by slug");

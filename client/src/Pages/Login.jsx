@@ -19,7 +19,7 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch(`https://eventkamek-production.up.railway.app/api/login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role, email, password }),

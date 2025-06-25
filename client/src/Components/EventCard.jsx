@@ -6,7 +6,7 @@ const EventCard = ({event}) => {
     return (
         <Link to={`/Events/${event.eventslug}`} className="event-card-link" style={{ textDecoration: 'none', color: 'inherit' }}>
             <div className="event-card">
-                <img src={`https://eventkamek-production.up.railway.app/uploads/eventImages/${event.eventimage}`} alt="event image" />
+                <img src={`${import.meta.env.VITE_API_BASE}/uploads/eventImages/${event.eventimage}`} alt="event image" />
                 <div className="event-card-details">
                     <div className="event-card-details-header">
                         <h2>{event.eventname}</h2>

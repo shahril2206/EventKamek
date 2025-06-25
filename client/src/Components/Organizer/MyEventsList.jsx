@@ -9,7 +9,7 @@ const MyEventsList = ({ filter }) => {
     const fetchEvents = async () => {
       try {
         const email = localStorage.getItem('email');
-        const response = await fetch(`https://eventkamek-production.up.railway.app/api/eventsbooth?email=${encodeURIComponent(email)}`);
+        const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/eventsbooth?email=${encodeURIComponent(email)}`);
         const text = await response.text();
         console.log('📦 Raw response:', text);
 
