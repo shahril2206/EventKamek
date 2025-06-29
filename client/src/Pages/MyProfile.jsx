@@ -22,14 +22,14 @@ const MyProfile = () => {
     const fetchProfile = async () => {
       if (role === 'organizer') {
         try {
-          const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/organizer/myprofile?email=${encodeURIComponent(email)}`);
+          const res = await fetch(`${import.meta.env.API_BASE}/api/organizer/myprofile?email=${encodeURIComponent(email)}`);
           const data = await res.json();
           if (res.ok) {
             setProfile({
               name: data.organizationname,
               email: data.organizeremail,
               contactnum: data.contactnum,
-              profilePic: `${import.meta.env.VITE_API_BASE}/uploads/organizerPFP/${data.profilepic || 'dummyProfilePic.png'}`,
+              profilePic: `${import.meta.env.API_BASE}/uploads/organizerPFP/${data.profilepic || 'dummyProfilePic.png'}`,
               facebooklink: data.facebooklink || '-',
               instagramlink: data.instagramlink || '-',
               tiktoklink: data.tiktoklink || '-',
@@ -44,14 +44,14 @@ const MyProfile = () => {
         }
       } else if (role === 'vendor') {
         try {
-          const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/vendor/myprofile?email=${encodeURIComponent(email)}`);
+          const res = await fetch(`${import.meta.env.API_BASE}/api/vendor/myprofile?email=${encodeURIComponent(email)}`);
           const data = await res.json();
           if (res.ok) {
             setProfile({
               name: data.vendorname,
               email: data.vendoremail,
               contactnum: data.contactnum,
-              profilePic: `${import.meta.env.VITE_API_BASE}/uploads/vendorPFP/${data.profilepic || 'dummyProfilePic.png'}`,
+              profilePic: `${import.meta.env.API_BASE}/uploads/vendorPFP/${data.profilepic || 'dummyProfilePic.png'}`,
               facebooklink: data.facebooklink || '-',
               instagramlink: data.instagramlink || '-',
               tiktoklink: data.tiktoklink || '-',
@@ -76,7 +76,7 @@ const MyProfile = () => {
       name: updatedData.name,
       email: updatedData.email,
       contactnum: updatedData.contactnum,
-      profilePic: `${import.meta.env.VITE_API_BASE}/uploads/vendorPFP/${updatedData.profilepic || 'dummyProfilePic.png'}`,
+      profilePic: `${import.meta.env.API_BASE}/uploads/vendorPFP/${updatedData.profilepic || 'dummyProfilePic.png'}`,
       facebooklink: updatedData.facebooklink || '-',
       instagramlink: updatedData.instagramlink || '-',
       tiktoklink: updatedData.tiktoklink || '-',

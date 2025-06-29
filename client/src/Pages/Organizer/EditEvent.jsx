@@ -19,7 +19,7 @@ const EditEvent = () => {
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: `${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`,
+    googleMapsApiKey: `${import.meta.env.GOOGLE_MAPS_API}`,
   });
 
   const { slug } = useParams();
@@ -95,7 +95,7 @@ const EditEvent = () => {
   useEffect(() => {
     const fetchEventData = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/${slug}`);
+      const response = await fetch(`${import.meta.env.API_BASE}/api/events/${slug}`);
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Fetch failed');
 

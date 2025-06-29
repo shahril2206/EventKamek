@@ -47,7 +47,7 @@ const PaymentBooking = () => {
     console.log("➡️ Booking Data Sent:", bookingData);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/bookings`, {
+      const response = await fetch(`${import.meta.env.API_BASE}/api/bookings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData),

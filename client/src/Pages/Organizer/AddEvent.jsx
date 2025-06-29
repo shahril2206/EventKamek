@@ -22,7 +22,7 @@ const AddEvent = () => {
   };
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: `${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`,
+    googleMapsApiKey: `${import.meta.env.GOOGLE_MAPS_API}`,
   });
 
   const [map, setMap] = useState(null);
@@ -216,7 +216,7 @@ const AddEvent = () => {
     };
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/create`, {
+      const res = await fetch(`${import.meta.env.API_BASE}/api/events/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

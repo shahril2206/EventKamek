@@ -188,7 +188,7 @@ const Calendar = ({ events, userEmail, userRole }) => {
               <div className="flex justify-center !mr-5">
                 <img
                   className="w-30 rounded-lg"
-                  src={`${import.meta.env.VITE_API_BASE}/uploads/eventImages/${selectedEvent.eventimage}`}
+                  src={`${import.meta.env.API_BASE}/uploads/eventImages/${selectedEvent.eventimage}`}
                   alt="event"
                 />
               </div>

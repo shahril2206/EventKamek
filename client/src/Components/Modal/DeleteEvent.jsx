@@ -10,7 +10,7 @@ const DeleteEvent = ({ isOpen, onClose, currentEvent }) => {
         e.preventDefault();
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/delete/${currentEvent.eventid}`, {
+            const response = await fetch(`${import.meta.env.API_BASE}/api/events/delete/${currentEvent.eventid}`, {
             method: 'DELETE',
             });
 

@@ -28,7 +28,7 @@ const RefundDeposit = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/refunddeposit/${assignmentid}`, {
+      const res = await fetch(`${import.meta.env.API_BASE}/api/refunddeposit/${assignmentid}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

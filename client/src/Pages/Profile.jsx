@@ -9,7 +9,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/profile/public?email=${encodeURIComponent(email)}&role=${encodeURIComponent(role)}`);
+        const res = await fetch(`${import.meta.env.API_BASE}/api/profile/public?email=${encodeURIComponent(email)}&role=${encodeURIComponent(role)}`);
         const data = await res.json();
         if (res.ok) {
           setProfile({
@@ -17,7 +17,7 @@ const Profile = () => {
             email: data.email,
             contactnum: data.contactnum,
             role: data.role,
-            profilePic: `${import.meta.env.VITE_API_BASE}/uploads/${data.role === 'organizer' ? 'organizerPFP' : 'vendorPFP'}/${data.profilepic || 'dummyProfilePic.png'}`,
+            profilePic: `${import.meta.env.API_BASE}/uploads/${data.role === 'organizer' ? 'organizerPFP' : 'vendorPFP'}/${data.profilepic || 'dummyProfilePic.png'}`,
             facebooklink: data.facebooklink || '-',
             instagramlink: data.instagramlink || '-',
             tiktoklink: data.tiktoklink || '-',

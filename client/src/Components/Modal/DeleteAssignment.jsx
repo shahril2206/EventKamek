@@ -16,7 +16,7 @@ const DeleteAssignment = ({ isOpen, onClose, selectedEvent, selectedAssignment }
     useEffect(() => {
         const fetchAssignment = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/assignment/${assignmentid}`);
+                const res = await fetch(`${import.meta.env.API_BASE}/api/assignment/${assignmentid}`);
                 if (!res.ok) throw new Error('Failed to fetch assignment data');
                 const data = await res.json();
                 setAssignment(data);

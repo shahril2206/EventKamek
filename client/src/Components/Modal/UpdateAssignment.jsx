@@ -19,7 +19,7 @@ const UpdateAssignment = ({
 
       const fetchAvailableBooths = async () => {
         try {
-          const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/unassigned-booths/${selectedEvent.eventid}`);
+          const res = await fetch(`${import.meta.env.API_BASE}/api/unassigned-booths/${selectedEvent.eventid}`);
           const data = await res.json();
 
           // Always include the currently selected boothno in the list
@@ -75,7 +75,7 @@ const UpdateAssignment = ({
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/updateassignment`, {
+      const res = await fetch(`${import.meta.env.API_BASE}/api/updateassignment`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -25,7 +25,7 @@ const EventBooths = () => {
     const fetchEventBoothDetails = async () => {
       try {
         // Step 1: Get eventId using slug
-        const slugRes = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/${slug}`);
+        const slugRes = await fetch(`${import.meta.env.API_BASE}/api/events/${slug}`);
         const slugData = await slugRes.json();
 
         if (!slugRes.ok) throw new Error(slugData.error || "Failed to fetch event by slug");
@@ -34,7 +34,7 @@ const EventBooths = () => {
         console.log("Event ID:", eventId);
 
         // Step 2: Now fetch booth details using eventId
-        const boothRes = await fetch(`${import.meta.env.VITE_API_BASE}/api/eventbooths/${eventId}`);
+        const boothRes = await fetch(`${import.meta.env.API_BASE}/api/eventbooths/${eventId}`);
         const boothData = await boothRes.json();
 
         setEventData(boothData.eventData);
@@ -100,7 +100,7 @@ const EventBooths = () => {
                   if (confirmAssign) {
                     setToggleView(true); // ✅ Only enable if confirmed
                     try {
-                      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/autoassign/${eventData.eventid}`, {
+                      const res = await fetch(`${import.meta.env.API_BASE}/api/autoassign/${eventData.eventid}`, {
                         method: 'POST',
                       });
                       const data = await res.json();
