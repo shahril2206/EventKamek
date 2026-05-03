@@ -566,10 +566,10 @@ app.post('/api/bookings', async (req, res) => {
   const {
     vendoremail,
     eventId,
-    eventStartDate,
-    eventEndDate,
     boothName,
     boothCategory,
+    eventStarDate,
+    eventEndDate,
     remark,
   } = req.body;
 
@@ -597,6 +597,7 @@ app.post('/api/bookings', async (req, res) => {
       WHERE eventid = $1
     `, [eventId]);
 
+
     if (!eventInfoRes.rows.length) {
       await client.query('ROLLBACK');
       return res.status(404).json({ error: 'Event not found' });
@@ -605,7 +606,7 @@ app.post('/api/bookings', async (req, res) => {
     const { eventname, organizeremail } = eventInfoRes.rows[0];
 
     // 3. Send email to organizer
-    await sendBookingEmailToOrganizer(organizeremail, eventname, eventStartDate, eventEndDate, vendoremail, boothName, boothCategory, remark);
+    // await sendBookingEmailToOrganizer(organizeremail, eventname, eventStarDate, eventEndDate, vendoremail, boothName, boothCategory, remark);
 
     await client.query('COMMIT');
     res.status(201).json({ success: true, message: 'Booking saved and email sent' });
@@ -789,6 +790,61 @@ app.put('/api/events/update/:slug', async (req, res) => {
         slug,
       ]
     );
+
+    // After updating event in events table
+
+    // const newBoothSlots = parseInt(data.boothSlots);
+
+    // try {
+    //   // Fetch booths with boothno > newBoothSlots for the event
+    //   const { rows: boothsToCheck } = await pool.query(
+    //     `SELECT boothid, boothno, isassigned FROM booths WHERE eventid = (
+    //       SELECT eventid FROM events WHERE eventslug = $1
+    //     ) AND boothno > $2 ORDER BY boothno ASC`,
+    //     [slug, newBoothSlots]
+    //   );
+
+    //   // Fetch unoccupied lower booth slots
+    //   const { rows: lowerBooths } = await pool.query(
+    //     `SELECT boothid, boothno FROM booths WHERE eventid = (
+    //       SELECT eventid FROM events WHERE eventslug = $1
+    //     ) AND boothno <= $2 AND isassigned = false ORDER BY boothno ASC`,
+    //     [slug, newBoothSlots]
+    //   );
+
+    //   for (const booth of boothsToCheck) {
+    //     if (booth.isassigned) {
+    //       // Find lowest unoccupied boothno
+    //       const targetBooth = lowerBooths.shift(); // FIFO: smallest boothno
+    //       if (targetBooth) {
+    //         await pool.query(
+    //           `UPDATE booths SET boothno = $1 WHERE boothid = $2`,
+    //           [targetBooth.boothno, booth.boothid]
+    //         );
+    //       } else {
+    //         // No available lower slots, you may decide to skip or handle differently
+    //         console.log(`⚠️ No lower slot to reassign occupied boothno ${booth.boothno}`);
+    //       }
+    //     } else {
+    //       // Unoccupied: delete
+    //       await pool.query(`DELETE FROM booths WHERE boothid = $1`, [booth.boothid]);
+    //     }
+    //   }
+
+    //   // Finally, clean up any booths still > newBoothSlots in case they remain unoccupied
+    //   await pool.query(
+    //     `DELETE FROM booths WHERE eventid = (
+    //       SELECT eventid FROM events WHERE eventslug = $1
+    //     ) AND boothno > $2 AND isassigned = false`,
+    //     [slug, newBoothSlots]
+    //   );
+
+    //   res.json({ success: true, message: 'Event and booths updated successfully.' });
+    // } catch (err) {
+    //   console.error('❌ Booth update error:', err.message, err.stack);
+    //   res.status(500).json({ error: 'Failed to adjust booths', details: err.message });
+    // }
+
 
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Event not found or not updated.' });
@@ -1169,17 +1225,17 @@ app.post('/api/addassignments', async (req, res) => {
     `, [eventid, vendoremail, boothno]);
       if (detailsRes.rows.length > 0) {
         const details = detailsRes.rows[0];
-        await sendNewAssignmentEmailToVendor(
-          details.vendoremail,
-          details.eventname,
-          details.eventstartdate,
-          details.eventenddate,
-          details.eventlocation,
-          details.boothno,
-          details.boothname,
-          details.boothcategory,
-          details.remark
-        );
+        // await sendNewAssignmentEmailToVendor(
+        //   details.vendoremail,
+        //   details.eventname,
+        //   details.eventstartdate,
+        //   details.eventenddate,
+        //   details.eventlocation,
+        //   details.boothno,
+        //   details.boothname,
+        //   details.boothcategory,
+        //   details.remark
+        // );
       }
     } finally {
       newClient.release();
@@ -1277,17 +1333,17 @@ app.put('/api/updateassignment', async (req, res) => {
 
       if (detailsRes.rows.length > 0) {
         const details = detailsRes.rows[0];
-        await sendUpdatedAssignmentEmailToVendor(
-          details.vendoremail,
-          details.eventname,
-          details.eventstartdate,
-          details.eventenddate,
-          details.eventlocation,
-          details.boothno,
-          details.boothname,
-          details.boothcategory,
-          remark
-        );
+        // await sendUpdatedAssignmentEmailToVendor(
+        //   details.vendoremail,
+        //   details.eventname,
+        //   details.eventstartdate,
+        //   details.eventenddate,
+        //   details.eventlocation,
+        //   details.boothno,
+        //   details.boothname,
+        //   details.boothcategory,
+        //   remark
+        // );
       }
     }
     finally {
@@ -1328,6 +1384,80 @@ app.get('/api/assignment/:assignmentid', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error', detail: err.message });
     }
 });
+
+// ========== DELETE EVENT ==========
+
+app.delete('/api/events/delete/:eventId', async (req, res) => {
+  const { eventId } = req.params;
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // 1️⃣ Check for existing assignments
+    const assignmentCheck = await client.query(
+      `SELECT COUNT(*) FROM assignment WHERE eventid = $1 AND iscancelled = false`,
+      [eventId]
+    );
+    const assignmentCount = parseInt(assignmentCheck.rows[0].count);
+
+    if (assignmentCount > 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete event: There are ${assignmentCount} related assignments. Please remove them first.`
+      });
+    }
+
+    // 2️⃣ Check for existing bookings
+    const bookingCheck = await client.query(
+      `SELECT COUNT(*) FROM booking WHERE eventid = $1 AND iscancelled = false`,
+      [eventId]
+    );
+    const bookingCount = parseInt(bookingCheck.rows[0].count);
+
+    if (bookingCount > 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete event: There are ${bookingCount} related bookings. Please remove them first.`
+      });
+    }
+
+    // 3️⃣ Delete related booths
+    await client.query(`DELETE FROM booth WHERE eventid = $1`, [eventId]);
+
+    // 4️⃣ Delete the event
+    const deleteResult = await client.query(
+      `DELETE FROM events WHERE eventid = $1 RETURNING *`,
+      [eventId]
+    );
+
+    if (deleteResult.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found or already deleted.'
+      });
+    }
+
+    await client.query('COMMIT');
+    res.json({
+      success: true,
+      message: 'Event and related booths deleted successfully.'
+    });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('❌ Event deletion error:', err);
+    res.status(500).json({
+      error: 'Failed to delete event',
+      details: err.message
+    });
+  } finally {
+    client.release();
+  }
+});
+
 
 // ========== REMOVE ASSIGNMENT ==========
 app.put('/api/removeassignment/:assignmentid', async (req, res) => {
@@ -1404,16 +1534,16 @@ app.put('/api/removeassignment/:assignmentid', async (req, res) => {
       `, [assignmentId]);
       if (detailsRes.rows.length > 0) {
         const details = detailsRes.rows[0];
-        await sendCancellationEmailToVendor(
-          details.vendoremail,
-          details.eventname,
-          details.eventstartdate,
-          details.eventenddate,
-          details.eventlocation,
-          details.boothname,
-          details.boothcategory,
-          cancellationremark
-        );
+        // await sendCancellationEmailToVendor(
+        //   details.vendoremail,
+        //   details.eventname,
+        //   details.eventstartdate,
+        //   details.eventenddate,
+        //   details.eventlocation,
+        //   details.boothname,
+        //   details.boothcategory,
+        //   cancellationremark
+        // );
       } else {
         console.log('❌ No details found for assignment ID:', assignmentId);
       }
@@ -1709,6 +1839,18 @@ app.post('/api/autoassign/:eventId', async (req, res) => {
 
     const assignCount = Math.min(bookings.length, booths.length);
 
+    const eventRes = await client.query(`
+      SELECT eventname, eventstartdate, eventenddate, eventlocation
+      FROM events
+      WHERE eventid = $1
+    `, [eventId]);
+
+    if (eventRes.rows.length === 0) {
+      throw new Error(`Event with id ${eventId} not found`);
+    }
+    const { eventname, eventstartdate, eventenddate, eventlocation } = eventRes.rows[0];
+
+
     for (let i = 0; i < assignCount; i++) {
       const booking = bookings[i];
       const booth = booths[i];
@@ -1737,7 +1879,7 @@ app.post('/api/autoassign/:eventId', async (req, res) => {
       `, [booking.bookingid]);
 
       // 4. Send email
-      await sendAssignmentEmailToVendor(
+      await sendNewAssignmentEmailToVendor(
         booking.vendoremail,
         eventname,
         eventstartdate,

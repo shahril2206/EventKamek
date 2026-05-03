@@ -438,7 +438,7 @@ const EditEvent = () => {
               name="boothSlots"
               value={formData.boothSlots}
               min = {formData.bookedBooths}
-              placeholder={`can be less than booked booths (${formData.bookedBooths})`}
+              placeholder={`can not be less than booked booths (${formData.bookedBooths})`}
               onChange={e => {
               handleChange(e);
               const value = e.target.value;
