@@ -14,9 +14,7 @@ const EventBooths = () => {
 
   const [boothSearchKeyword, setBoothSearchKeyword] = useState('');
   const [vendorSearchKeyword, setVendorSearchKeyword] = useState('');
-
-
-  const [toggleView, setToggleView] = useState(false); // <-- Added this line
+  const [selectedVendorIds, setSelectedVendorIds] = useState([]);
 
   const { slug } = useParams();
   console.log("Slug:", slug);
@@ -83,43 +81,6 @@ const EventBooths = () => {
           <span className="underline">{eventData.eventname || 'Loading...'}</span>
         </h1>
 
-        {/* Toggle Switch for enabling auto-assignment */}
-        {eventData.status === "Upcoming" && eventData.boothbookingenabled === true ? (
-          <div className="toggle-auto-assign">
-            <label htmlFor="toggleAutoAssign" className="text-base font-medium text-gray-700">
-              Enable auto-assignment
-            </label>
-            <input
-              id="viewToggle"
-              type="checkbox"
-              className="toggle-switch"
-              checked={toggleView}
-              onChange={async () => {
-                if (!toggleView) {
-                  const confirmAssign = window.confirm("Auto-assign all vendors to available booths?");
-                  if (confirmAssign) {
-                    setToggleView(true); // ✅ Only enable if confirmed
-                    try {
-                      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/autoassign/${eventData.eventid}`, {
-                        method: 'POST',
-                      });
-                      const data = await res.json();
-                      alert(data.message || 'Auto-assignment complete');
-                      window.location.reload(); // Optional: re-fetch data
-                    } catch (error) {
-                      alert('Auto-assignment failed');
-                      console.error(error);
-                    }
-                  }
-                } else {
-                  setToggleView(false); // Turning off toggle
-                }
-              }}
-
-            />
-
-          </div>
-        ) : null}
       </div>
       
       {eventData.boothbookingenabled === true ? (
@@ -169,9 +130,35 @@ const EventBooths = () => {
 
         <div className="content-container !mt-20 border-1">
           <div className="unassigned-vendors-section">
-            <h2 className="unassigned-vendors-heading">Unassigned Vendors ({bookings.length})</h2>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="unassigned-vendors-heading">Unassigned Vendors ({bookings.length})</h2>
+              {eventData.status === "Upcoming" && selectedVendorIds.length > 0 && (
+                <button
+                  className="bulk-assign-btn"
+                  onClick={async () => {
+                    const confirmAssign = window.confirm(`Bulk assign ${selectedVendorIds.length} selected vendor(s) to available booths?`);
+                    if (!confirmAssign) return;
+                    try {
+                      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/autoassign/${eventData.eventid}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ bookingIds: selectedVendorIds }),
+                      });
+                      const data = await res.json();
+                      alert(data.message || 'Bulk assignment complete');
+                      setSelectedVendorIds([]);
+                      window.location.reload();
+                    } catch (error) {
+                      alert('Bulk assignment failed');
+                      console.error(error);
+                    }
+                  }}
+                >
+                  Bulk Assign ({selectedVendorIds.length})
+                </button>
+              )}
+            </div>
             <div className="booth-search-bar">
-              {/* Unassigned vendor search bar */}
               <input
                 type="text"
                 placeholder="Enter keywords..."
@@ -179,12 +166,13 @@ const EventBooths = () => {
                 value={vendorSearchKeyword}
                 onChange={(e) => setVendorSearchKeyword(e.target.value)}
               />
-
             </div>
             <UnassignedVendorsTable
               eventData={eventData}
               bookings={bookings}
               keyword={vendorSearchKeyword}
+              selectedIds={selectedVendorIds}
+              onSelectionChange={setSelectedVendorIds}
             />
           </div>
 

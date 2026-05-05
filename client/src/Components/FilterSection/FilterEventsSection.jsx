@@ -46,12 +46,12 @@ const FilterEventsSection = ({ view, role, events, onFilter }) => {
       );
     });
 
-    // Date range filter
+    // Date range filter — compare as YYYY-MM-DD strings to avoid timezone shifts
     if (startDate) {
-      filtered = filtered.filter(e => new Date(e.eventstartdate) >= new Date(startDate));
+      filtered = filtered.filter(e => e.eventstartdate?.slice(0, 10) >= startDate);
     }
     if (endDate) {
-      filtered = filtered.filter(e => new Date(e.eventstartdate) <= new Date(endDate));
+      filtered = filtered.filter(e => e.eventstartdate?.slice(0, 10) <= endDate);
     }
 
     // Role filter

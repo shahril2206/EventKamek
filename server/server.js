@@ -9,6 +9,13 @@ const fs = require('fs');
 const multer = require('multer');
 const pool = require('./db');
 
+// Return DATE columns as plain YYYY-MM-DD strings instead of JS Date objects (avoids UTC timezone shift)
+const pg = require('pg');
+pg.types.setTypeParser(1082, val => val);
+
+const Groq = require('groq-sdk');
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
 const uploadProfilePic = multer({ storage: multer.memoryStorage() });
 const uploadEventImages = multer({ storage: multer.memoryStorage() });
 
@@ -1880,22 +1887,30 @@ app.get('/api/eventvendors/:eventid', async (req, res) => {
 
 app.post('/api/autoassign/:eventId', async (req, res) => {
   const { eventId } = req.params;
+  const { bookingIds } = req.body; // optional: array of specific booking IDs to assign
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
 
-    // Get unassigned bookings (not yet in assignment table)
-    const unassignedBookings = await client.query(`
+    // Get unassigned bookings, optionally filtered to specific IDs
+    // Use isassigned = false (same flag the UI uses) instead of NOT EXISTS,
+    // because old assignments may have bookingid = NULL which breaks NOT EXISTS
+    let unassignedQuery = `
       SELECT b.bookingid, b.vendoremail, b.boothname, b.boothcategory, b.remark
       FROM booking b
       WHERE b.eventid = $1
         AND b.iscancelled = false
-        AND NOT EXISTS (
-          SELECT 1 FROM assignment a WHERE a.bookingid = b.bookingid
-        )
-      ORDER BY b.bookingid ASC
-    `, [eventId]);
+        AND b.isassigned = false
+    `;
+    const queryParams = [eventId];
+    if (bookingIds && bookingIds.length > 0) {
+      queryParams.push(bookingIds);
+      unassignedQuery += ` AND b.bookingid = ANY($2::int[])`;
+    }
+    unassignedQuery += ` ORDER BY b.bookingid ASC`;
+
+    const unassignedBookings = await client.query(unassignedQuery, queryParams);
 
 
     // Get available booths (not already assigned)
@@ -2018,6 +2033,63 @@ app.get('/api/profile/public', async (req, res) => {
   } catch (err) {
     console.error('Fetch public profile error:', err);
     return res.status(500).json({ error: 'Failed to fetch profile', details: err.message });
+  }
+});
+
+// ========== CHATBOT ==========
+
+app.post('/api/chat', async (req, res) => {
+  const { message, history = [] } = req.body;
+
+  try {
+    // Fetch all events upfront and inject as context — no tool calling needed
+    const result = await pool.query(`
+      SELECT e.eventname, e.eventslug,
+             TO_CHAR(e.eventstartdate, 'YYYY-MM-DD') AS eventstartdate,
+             TO_CHAR(e.eventenddate, 'YYYY-MM-DD') AS eventenddate,
+             e.eventlocation, e.status, e.boothslots,
+             e.boothfee, TO_CHAR(e.bookingclosingdate, 'YYYY-MM-DD') AS bookingclosingdate,
+             e.eventdetails, eo.organizationname, eo.contactnum,
+             COUNT(b.*) FILTER (WHERE b.iscancelled = false) AS bookedbooths
+      FROM events e
+      JOIN eventorganizer eo ON e.organizeremail = eo.organizeremail
+      LEFT JOIN booking b ON b.eventid = e.eventid
+      GROUP BY e.eventid, eo.organizationname, eo.contactnum
+      ORDER BY e.eventstartdate ASC
+    `);
+
+    const events = result.rows.map(ev => ({
+      ...ev,
+      availableBooths: (ev.boothslots || 0) - (ev.bookedbooths || 0),
+      fullyBooked: (ev.boothslots || 0) - (ev.bookedbooths || 0) <= 0,
+    }));
+
+    const systemPrompt = `You are Boi, a friendly assistant for EventKamek — an event management platform.
+You help anyone discover events and check booth availability using the event data below.
+Answer questions about event dates, locations, booth availability, fees, and organizers.
+Be concise and friendly. Format event lists clearly.
+If asked about managing events, booking booths, or anything requiring login, say those actions must be done on the website.
+
+Current event data (today is ${new Date().toDateString()}):
+${JSON.stringify(events, null, 2)}`;
+
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...history,
+      { role: 'user', content: message },
+    ];
+
+    const response = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages,
+      max_tokens: 1024,
+    });
+
+    const reply = response.choices[0].message.content || 'Sorry, I could not generate a response.';
+    res.json({ reply, history: messages.slice(1) });
+  } catch (err) {
+    console.error('Chat error:', err.message);
+    res.status(500).json({ error: 'Chat failed', details: err.message });
   }
 });
 

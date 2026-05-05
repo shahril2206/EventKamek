@@ -16,6 +16,7 @@ import EditEvent from './Pages/Organizer/EditEvent';
 import PaymentBooking from './Pages/Vendor/PaymentBooking';
 import RefundCancelledBooking from './Pages/Organizer/RefundCancelledBooking';
 import RefundDeposit from './Pages/Organizer/RefundDeposit';
+import ChatBot from './Components/ChatBot';
 
 const NO_FOOTER_ROUTES = ['/RefundCancelledBooking', '/PaymentBooking'];
 
@@ -44,6 +45,7 @@ const App = () => {
         <Route path="/RefundDeposit" element={<RefundDeposit />} />
       </Routes>
       {showFooter && <Footer />}
+      <ChatBot />
     </>
   )
 }

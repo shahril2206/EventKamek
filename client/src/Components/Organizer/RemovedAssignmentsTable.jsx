@@ -14,7 +14,6 @@ const RemovedAssignmentsTable = ({ assignments }) => {
           <table className="booth-table">
             <thead>
               <tr>
-                <th>No.</th>
                 <th>Cancellation Date & Time</th>
                 <th>Vendor Name</th>
                 <th>Booth Name</th>
@@ -25,7 +24,6 @@ const RemovedAssignmentsTable = ({ assignments }) => {
             <tbody>
               {assignments.map((a, i) => (
                 <tr key={i}>
-                  <td>{a.assignmentid}</td>
                   <td>{a.cancellationdatetime}</td>
                   <td>{a.vendorname || '-'}</td>
                   <td>{a.boothname || '-'}</td>

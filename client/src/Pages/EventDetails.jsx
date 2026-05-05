@@ -141,20 +141,20 @@ const EventDetails = () => {
                       <button
                         type="button"
                         onClick={() => setCarouselIndex(i => (i - 1 + eventImages.length) % eventImages.length)}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/70"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/70 cursor-pointer"
                       >&#8249;</button>
                       <button
                         type="button"
                         onClick={() => setCarouselIndex(i => (i + 1) % eventImages.length)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/70"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/70 cursor-pointer"
                       >&#8250;</button>
-                      <div className="flex justify-center gap-1 mt-2">
+                      <div className="flex justify-center gap-1">
                         {eventImages.map((_, i) => (
                           <button
                             key={i}
                             type="button"
                             onClick={() => setCarouselIndex(i)}
-                            className={`w-2 h-2 rounded-full ${i === carouselIndex ? 'bg-[#15104a]' : 'bg-gray-300'}`}
+                            className={`w-2 h-2 rounded-full ${i === carouselIndex ? 'bg-[#15104a]' : 'bg-gray-300'} cursor-pointer position-absolute hover:bg-gray-400`}
                           />
                         ))}
                       </div>
