@@ -603,13 +603,16 @@ app.post('/api/bookings', async (req, res) => {
       return res.status(404).json({ error: 'Event not found' });
     }
 
-    const { eventname, organizeremail } = eventInfoRes.rows[0];
-
-    // 3. Send email to organizer
-    // await sendBookingEmailToOrganizer(organizeremail, eventname, eventStarDate, eventEndDate, vendoremail, boothName, boothCategory, remark);
+    const { eventname, organizeremail, eventstartdate, eventenddate } = eventInfoRes.rows[0];
 
     await client.query('COMMIT');
-    res.status(201).json({ success: true, message: 'Booking saved and email sent' });
+    res.status(201).json({ success: true, message: 'Booking saved' });
+
+    // Send email after commit so a failure doesn't roll back the booking
+    sendBookingEmailToOrganizer(organizeremail, eventname, eventstartdate, eventenddate, vendoremail, boothName, boothCategory, remark)
+      .then(() => console.log('Booking email sent to organizer:', organizeremail))
+      .catch(err => console.error('Booking email failed:', err.message));
+
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Booking Error:', err);
@@ -791,63 +794,41 @@ app.put('/api/events/update/:slug', async (req, res) => {
       ]
     );
 
-    // After updating event in events table
-
-    // const newBoothSlots = parseInt(data.boothSlots);
-
-    // try {
-    //   // Fetch booths with boothno > newBoothSlots for the event
-    //   const { rows: boothsToCheck } = await pool.query(
-    //     `SELECT boothid, boothno, isassigned FROM booths WHERE eventid = (
-    //       SELECT eventid FROM events WHERE eventslug = $1
-    //     ) AND boothno > $2 ORDER BY boothno ASC`,
-    //     [slug, newBoothSlots]
-    //   );
-
-    //   // Fetch unoccupied lower booth slots
-    //   const { rows: lowerBooths } = await pool.query(
-    //     `SELECT boothid, boothno FROM booths WHERE eventid = (
-    //       SELECT eventid FROM events WHERE eventslug = $1
-    //     ) AND boothno <= $2 AND isassigned = false ORDER BY boothno ASC`,
-    //     [slug, newBoothSlots]
-    //   );
-
-    //   for (const booth of boothsToCheck) {
-    //     if (booth.isassigned) {
-    //       // Find lowest unoccupied boothno
-    //       const targetBooth = lowerBooths.shift(); // FIFO: smallest boothno
-    //       if (targetBooth) {
-    //         await pool.query(
-    //           `UPDATE booths SET boothno = $1 WHERE boothid = $2`,
-    //           [targetBooth.boothno, booth.boothid]
-    //         );
-    //       } else {
-    //         // No available lower slots, you may decide to skip or handle differently
-    //         console.log(`⚠️ No lower slot to reassign occupied boothno ${booth.boothno}`);
-    //       }
-    //     } else {
-    //       // Unoccupied: delete
-    //       await pool.query(`DELETE FROM booths WHERE boothid = $1`, [booth.boothid]);
-    //     }
-    //   }
-
-    //   // Finally, clean up any booths still > newBoothSlots in case they remain unoccupied
-    //   await pool.query(
-    //     `DELETE FROM booths WHERE eventid = (
-    //       SELECT eventid FROM events WHERE eventslug = $1
-    //     ) AND boothno > $2 AND isassigned = false`,
-    //     [slug, newBoothSlots]
-    //   );
-
-    //   res.json({ success: true, message: 'Event and booths updated successfully.' });
-    // } catch (err) {
-    //   console.error('❌ Booth update error:', err.message, err.stack);
-    //   res.status(500).json({ error: 'Failed to adjust booths', details: err.message });
-    // }
-
-
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Event not found or not updated.' });
+    }
+
+    // Sync booth rows with the new boothSlots value
+    if (data.boothSlots !== null && data.includeVendorBooth) {
+      const newSlots = parseInt(data.boothSlots);
+
+      // Get the event id and current max boothno
+      const eventRes = await pool.query(
+        `SELECT eventid FROM events WHERE eventslug = $1`, [slug]
+      );
+      const eventid = eventRes.rows[0].eventid;
+
+      const currentRes = await pool.query(
+        `SELECT MAX(boothno) AS maxno FROM booth WHERE eventid = $1`, [eventid]
+      );
+      const currentMax = parseInt(currentRes.rows[0].maxno) || 0;
+
+      if (newSlots > currentMax) {
+        // Add missing booth rows
+        const inserts = [];
+        for (let i = currentMax + 1; i <= newSlots; i++) {
+          inserts.push(
+            pool.query(`INSERT INTO booth (eventid, boothno, isassigned) VALUES ($1, $2, false)`, [eventid, i])
+          );
+        }
+        await Promise.all(inserts);
+      } else if (newSlots < currentMax) {
+        // Remove only unassigned booths beyond the new limit
+        await pool.query(
+          `DELETE FROM booth WHERE eventid = $1 AND boothno > $2 AND isassigned = false`,
+          [eventid, newSlots]
+        );
+      }
     }
 
     res.json({ success: true, message: 'Event updated successfully.' });
@@ -1201,11 +1182,10 @@ app.post('/api/addassignments', async (req, res) => {
     );
 
     await client.query('COMMIT');
+    res.status(201).json({ success: true, message: 'Vendor assigned successfully' });
 
-    // Fetch assignment details in a new query
-    const newClient = await pool.connect();
-    try {
-      const detailsRes = await client.query(`
+    // Send email after response so failure doesn't affect the assignment
+    pool.query(`
       SELECT
         a.remark,
         b.boothno,
@@ -1215,33 +1195,22 @@ app.post('/api/addassignments', async (req, res) => {
         e.eventname,
         TO_CHAR(e.eventstartdate, 'DD Month YYYY') AS eventstartdate,
         TO_CHAR(e.eventenddate, 'DD Month YYYY') AS eventenddate,
-        e.eventlocation,
-        TO_CHAR(bk.bookingdatetime, 'DD Month YYYY, HH12:MI AM') AS bookingdatetime
+        e.eventlocation
       FROM assignment a
       JOIN booth b ON a.boothid = b.boothid
       JOIN events e ON a.eventid = e.eventid
-      JOIN booking bk ON a.bookingid = bk.bookingid
       WHERE a.eventid = $1 AND a.vendoremail = $2 AND b.boothno = $3
-    `, [eventid, vendoremail, boothno]);
-      if (detailsRes.rows.length > 0) {
-        const details = detailsRes.rows[0];
-        // await sendNewAssignmentEmailToVendor(
-        //   details.vendoremail,
-        //   details.eventname,
-        //   details.eventstartdate,
-        //   details.eventenddate,
-        //   details.eventlocation,
-        //   details.boothno,
-        //   details.boothname,
-        //   details.boothcategory,
-        //   details.remark
-        // );
-      }
-    } finally {
-      newClient.release();
-    }
-
-    res.status(201).json({ success: true, message: 'Vendor assigned successfully' });
+    `, [eventid, vendoremail, boothno])
+      .then(({ rows }) => {
+        if (!rows.length) return;
+        const d = rows[0];
+        return sendNewAssignmentEmailToVendor(
+          d.vendoremail, d.eventname, d.eventstartdate, d.eventenddate,
+          d.eventlocation, d.boothno, d.boothname, d.boothcategory, d.remark
+        );
+      })
+      .then(() => console.log('Assignment email sent to vendor:', vendoremail))
+      .catch(err => console.error('Assignment email failed:', err.message));
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('❌ Assignment error:', err);
@@ -1308,49 +1277,35 @@ app.put('/api/updateassignment', async (req, res) => {
     );
 
     await client.query('COMMIT');
+    res.json({ success: true, message: 'Assignment updated successfully' });
 
-    // 6. Fetch full assignment + event info
-    const newClient = await pool.connect();
-    try {
-      const detailsRes = await client.query(`
-        SELECT 
-          a.remark,
-          b.boothno,
-          a.boothname,
-          a.boothcategory,
-          a.vendoremail,
-          e.eventname,
-          TO_CHAR(e.eventstartdate, 'DD Month YYYY') AS eventstartdate,
-          TO_CHAR(e.eventenddate, 'DD Month YYYY') AS eventenddate,
-          e.eventlocation,
-          TO_CHAR(bk.bookingdatetime, 'DD Month YYYY, HH12:MI AM') AS bookingdatetime
-        FROM assignment a
-        JOIN booth b ON a.boothid = b.boothid
-        JOIN events e ON a.eventid = e.eventid
-        JOIN booking bk ON a.bookingid = bk.bookingid
-        WHERE a.assignmentid = $1
-      `, [assignmentid]);
-
-      if (detailsRes.rows.length > 0) {
-        const details = detailsRes.rows[0];
-        // await sendUpdatedAssignmentEmailToVendor(
-        //   details.vendoremail,
-        //   details.eventname,
-        //   details.eventstartdate,
-        //   details.eventenddate,
-        //   details.eventlocation,
-        //   details.boothno,
-        //   details.boothname,
-        //   details.boothcategory,
-        //   remark
-        // );
-      }
-    }
-    finally {
-      newClient.release();
-    }
-
-    res.json({ success: true, message: 'Assignment updated successfully and sent to email' });
+    // Send email after response so failure doesn't affect the update
+    pool.query(`
+      SELECT
+        a.remark,
+        b.boothno,
+        a.boothname,
+        a.boothcategory,
+        a.vendoremail,
+        e.eventname,
+        TO_CHAR(e.eventstartdate, 'DD Month YYYY') AS eventstartdate,
+        TO_CHAR(e.eventenddate, 'DD Month YYYY') AS eventenddate,
+        e.eventlocation
+      FROM assignment a
+      JOIN booth b ON a.boothid = b.boothid
+      JOIN events e ON a.eventid = e.eventid
+      WHERE a.assignmentid = $1
+    `, [assignmentid])
+      .then(({ rows }) => {
+        if (!rows.length) return;
+        const d = rows[0];
+        return sendUpdatedAssignmentEmailToVendor(
+          d.vendoremail, d.eventname, d.eventstartdate, d.eventenddate,
+          d.eventlocation, d.boothno, d.boothname, d.boothcategory, d.remark
+        );
+      })
+      .then(() => console.log('Update assignment email sent to vendor:', assignmentid))
+      .catch(err => console.error('Update assignment email failed:', err.message));
   } catch (err) {
     console.error('❌ Update assignment error:', err);
     res.status(500).json({ error: 'Failed to update assignment', details: err.message });
@@ -1507,52 +1462,51 @@ app.put('/api/removeassignment/:assignmentid', async (req, res) => {
     );
     console.log('✅ Updated booth row:', updateBooth.rowCount);
 
-    const updateBooking = await client.query(
-      `UPDATE booking SET iscancelled = true, isassigned = false WHERE bookingid = $1`,
-      [bookingid]
-    );
+    let updateBooking;
+    if (bookingid) {
+      updateBooking = await client.query(
+        `UPDATE booking SET iscancelled = true, isassigned = false WHERE bookingid = $1`,
+        [bookingid]
+      );
+    } else {
+      // fallback for assignments created without a bookingid (old auto-assign bug)
+      updateBooking = await client.query(
+        `UPDATE booking SET iscancelled = true, isassigned = false
+         WHERE eventid = (SELECT eventid FROM assignment WHERE assignmentid = $1)
+           AND vendoremail = (SELECT vendoremail FROM assignment WHERE assignmentid = $1)
+           AND iscancelled = false`,
+        [assignmentId]
+      );
+    }
     console.log('✅ Updated booking row:', updateBooking.rowCount);
 
     await client.query('COMMIT');
+    res.json({ message: 'Assignment cancelled and booth unassigned successfully.' });
 
-    // Fetch full details for email
-    const newClient = await pool.connect();
-    try {
-      const detailsRes = await client.query(`
-        SELECT 
-          a.boothname,
-          a.boothcategory,
-          a.remark,
-          a.vendoremail,
-          e.eventname,
-          TO_CHAR(e.eventstartdate, 'DD Month YYYY') AS eventstartdate,
-          TO_CHAR(e.eventenddate, 'DD Month YYYY') AS eventenddate,
-          e.eventlocation
-        FROM assignment a
-        JOIN events e ON a.eventid = e.eventid
-        WHERE a.assignmentid = $1
-      `, [assignmentId]);
-      if (detailsRes.rows.length > 0) {
-        const details = detailsRes.rows[0];
-        // await sendCancellationEmailToVendor(
-        //   details.vendoremail,
-        //   details.eventname,
-        //   details.eventstartdate,
-        //   details.eventenddate,
-        //   details.eventlocation,
-        //   details.boothname,
-        //   details.boothcategory,
-        //   cancellationremark
-        // );
-      } else {
-        console.log('❌ No details found for assignment ID:', assignmentId);
-      }
-    } finally {
-      newClient.release();
-    }
-    console.log('✅ Assignment cancelled and booth unassigned successfully');
-
-    res.json({ message: '✅ Assignment cancelled and booth unassigned successfully.' });
+    // Send email after response so failure doesn't affect the cancellation
+    pool.query(`
+      SELECT
+        a.boothname,
+        a.boothcategory,
+        a.vendoremail,
+        e.eventname,
+        TO_CHAR(e.eventstartdate, 'DD Month YYYY') AS eventstartdate,
+        TO_CHAR(e.eventenddate, 'DD Month YYYY') AS eventenddate,
+        e.eventlocation
+      FROM assignment a
+      JOIN events e ON a.eventid = e.eventid
+      WHERE a.assignmentid = $1
+    `, [assignmentId])
+      .then(({ rows }) => {
+        if (!rows.length) return;
+        const d = rows[0];
+        return sendCancellationEmailToVendor(
+          d.vendoremail, d.eventname, d.eventstartdate, d.eventenddate,
+          d.eventlocation, null, d.boothname, d.boothcategory, cancellationremark
+        );
+      })
+      .then(() => console.log('Cancellation email sent to vendor:', assignmentId))
+      .catch(err => console.error('Cancellation email failed:', err.message));
   } catch (err) {
     console.error('🔥 Refund error:', err);
     await client.query('ROLLBACK');
@@ -1851,21 +1805,24 @@ app.post('/api/autoassign/:eventId', async (req, res) => {
     const { eventname, eventstartdate, eventenddate, eventlocation } = eventRes.rows[0];
 
 
+    const emailQueue = [];
+
     for (let i = 0; i < assignCount; i++) {
       const booking = bookings[i];
       const booth = booths[i];
 
       // 1. insert assignment
       await client.query(`
-        INSERT INTO assignment (eventid, boothid, vendoremail, boothname, boothcategory, remark)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO assignment (eventid, boothid, vendoremail, boothname, boothcategory, remark, bookingid)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
       `, [
         eventId,
         booth.boothid,
         booking.vendoremail,
         booking.boothname,
         booking.boothcategory,
-        booking.remark
+        booking.remark,
+        booking.bookingid
       ]);
 
       // 2. update booth
@@ -1878,23 +1835,22 @@ app.post('/api/autoassign/:eventId', async (req, res) => {
         UPDATE booking SET isassigned = true WHERE bookingid = $1
       `, [booking.bookingid]);
 
-      // 4. Send email
-      await sendNewAssignmentEmailToVendor(
-        booking.vendoremail,
-        eventname,
-        eventstartdate,
-        eventenddate,
-        eventlocation,
-        booth.boothno,
-        booking.boothname,
-        booking.boothcategory,
-        booking.remark,
-        booking.bookingdatetime
-      );
+      // collect email details for after commit
+      emailQueue.push({ booking, booth });
     }
 
     await client.query('COMMIT');
     res.json({ message: `${assignCount} vendors auto-assigned and notified via email.` });
+
+    // Send emails after commit so failures don't roll back assignments
+    for (const { booking, booth } of emailQueue) {
+      sendNewAssignmentEmailToVendor(
+        booking.vendoremail, eventname, eventstartdate, eventenddate,
+        eventlocation, booth.boothno, booking.boothname, booking.boothcategory, booking.remark
+      )
+        .then(() => console.log('Auto-assign email sent to:', booking.vendoremail))
+        .catch(err => console.error('Auto-assign email failed for', booking.vendoremail, ':', err.message));
+    }
 
   } catch (err) {
     await client.query('ROLLBACK');

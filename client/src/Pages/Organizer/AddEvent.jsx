@@ -22,7 +22,7 @@ const AddEvent = () => {
   };
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: `${import.meta.env.GOOGLE_MAPS_API}`,
+    googleMapsApiKey: `${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`,
   });
 
   const [map, setMap] = useState(null);
@@ -51,20 +51,20 @@ const AddEvent = () => {
     eventLink: '',
     includeVendorBooth: false,
     bookingClosingDate: '',
-    boothSlots: 0,
+    boothSlots: "",
     categoryLimits: {
-      Food: 0,
-      Clothing: 0,
-      Toys: 0,
-      Craft: 0,
-      Books: 0,
-      Accessories: 0,
-      Other: 0,
+      Food: "",
+      Clothing: "",
+      Toys: "",
+      Craft: "",
+      Books: "",
+      Accessories: "",
+      Other: "",
     },
-    boothFee: 0.00,
-    refundableDepoAmt: 0.00,
-    nonRefundableDepoAmt: 0.00,
-    fullPayment: 0.00,
+    boothFee: "",
+    refundableDepoAmt: "",
+    nonRefundableDepoAmt: "",
+    fullPayment: "",
   });
 
   const [previewImage, setPreviewImage] = useState(null);
@@ -215,8 +215,23 @@ const AddEvent = () => {
       image: 'dummy.jpg',
     };
 
+    // Validate: only error if ALL categories have limits set and their sum < boothSlots
+    // If any category is blank/null (no limit), it can absorb remaining slots — no error needed
+    if (formData.includeVendorBooth && formData.boothSlots) {
+      const totalSlots = parseInt(formData.boothSlots, 10);
+      const limitValues = Object.values(formData.categoryLimits);
+      const hasUnlimited = limitValues.some(v => v === "" || v === null || v === undefined);
+      if (!hasUnlimited) {
+        const sumLimits = limitValues.reduce((sum, v) => sum + parseInt(v, 10), 0);
+        if (sumLimits < totalSlots) {
+          alert(`The total of all category limits (${sumLimits}) is less than booth slots (${totalSlots}). Increase the limits or leave some blank for no limit.`);
+          return;
+        }
+      }
+    }
+
     try {
-      const res = await fetch(`${import.meta.env.API_BASE}/api/events/create`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

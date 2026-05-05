@@ -19,7 +19,7 @@ const EditEvent = () => {
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: `${import.meta.env.GOOGLE_MAPS_API}`,
+    googleMapsApiKey: `${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`,
   });
 
   const { slug } = useParams();
@@ -36,6 +36,12 @@ const EditEvent = () => {
 
 
   const [map, setMap] = useState(null);
+
+  // Sync markerPosition into formData so lat/lng are always up to date on submit
+  useEffect(() => {
+    if (!markerPosition) return;
+    setFormData(prev => prev ? { ...prev, lat: markerPosition.lat, lng: markerPosition.lng } : prev);
+  }, [markerPosition]);
 
   const geocoder = useRef(null);
 
@@ -95,7 +101,7 @@ const EditEvent = () => {
   useEffect(() => {
     const fetchEventData = async () => {
     try {
-      const response = await fetch(`${import.meta.env.API_BASE}/api/events/${slug}`);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/${slug}`);
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Fetch failed');
 
@@ -261,6 +267,21 @@ const EditEvent = () => {
       ),
     };
 
+    // Validate: only error if ALL categories have limits set and their sum < boothSlots
+    // If any category is blank/null (no limit), it can absorb remaining slots — no error needed
+    if (formData.includeVendorBooth && formData.boothSlots) {
+      const totalSlots = parseInt(formData.boothSlots, 10);
+      const limitValues = Object.values(formData.categoryLimits);
+      const hasUnlimited = limitValues.some(v => v === "" || v === null || v === undefined);
+      if (!hasUnlimited) {
+        const sumLimits = limitValues.reduce((sum, v) => sum + parseInt(v, 10), 0);
+        if (sumLimits < totalSlots) {
+          alert(`The total of all category limits (${sumLimits}) is less than booth slots (${totalSlots}). Increase the limits or leave some blank for no limit.`);
+          return;
+        }
+      }
+    }
+
     try {
       const response = await fetch(`http://localhost:3000/api/events/update/${slug}`, {
         method: 'PUT',
@@ -413,12 +434,21 @@ const EditEvent = () => {
                 name="includeVendorBooth"
                 checked={formData.includeVendorBooth || false}
                 disabled={formData.bookedBooths > 0} // 👈 disable if booths are already booked
-                onChange={e =>
+                onChange={e => {
+                  const checked = e.target.checked;
                   setFormData(prev => ({
                     ...prev,
-                    includeVendorBooth: e.target.checked
-                  }))
-                }
+                    includeVendorBooth: checked,
+                    // Reset booth fields when enabling so stale DB zeros don't persist
+                    ...(checked && !prev.includeVendorBooth ? {
+                      boothSlots: "",
+                      categoryLimits: {
+                        Food: "", Clothing: "", Toys: "", Craft: "",
+                        Books: "", Accessories: "", Other: "",
+                      }
+                    } : {})
+                  }));
+                }}
               />
             </div>
             <label>Booking Form Closing Date {formData.includeVendorBooth && <span className="required">*</span>}:</label>
@@ -444,42 +474,25 @@ const EditEvent = () => {
               const value = e.target.value;
 
               setFormData(prev => {
-                const boothSlotsNum = parseInt(value, 10) || 0;
-
-                // Leave categoryLimits untouched if boothSlots is cleared
                 if (!value) {
-                  return {
-                    ...prev,
-                    boothSlots: value,
-                    categoryLimits: {
-                      Food: "",
-                      Clothing: "",
-                      Toys: "",
-                      Craft: "",
-                      Books: "",
-                      Accessories: "",
-                      Other: "",
-                    }
-                  };
+                  // Just clear boothSlots — keep categoryLimits as-is during editing
+                  return { ...prev, boothSlots: value };
                 }
 
-                // Clamp only existing numeric values
+                const boothSlotsNum = parseInt(value, 10) || 0;
+
+                // Clamp only existing numeric values — treat null from DB as blank
                 const newCategoryLimits = {};
                 ["Food", "Clothing", "Toys", "Craft", "Books", "Accessories", "Other"].forEach(cat => {
                   const prevVal = prev.categoryLimits?.[cat];
-                  if (prevVal !== "" && !isNaN(prevVal)) {
-                    const valNum = parseInt(prevVal, 10);
-                    newCategoryLimits[cat] = Math.min(valNum, boothSlotsNum);
+                  if (prevVal !== "" && prevVal !== null && !isNaN(prevVal)) {
+                    newCategoryLimits[cat] = Math.min(parseInt(prevVal, 10), boothSlotsNum);
                   } else {
-                    newCategoryLimits[cat] = prevVal; // preserve empty value
+                    newCategoryLimits[cat] = prevVal ?? "";
                   }
                 });
 
-                return {
-                  ...prev,
-                  boothSlots: value,
-                  categoryLimits: newCategoryLimits,
-                };
+                return { ...prev, boothSlots: value, categoryLimits: newCategoryLimits };
               });
             }}
 
@@ -497,7 +510,7 @@ const EditEvent = () => {
                     max={formData.boothSlots ? formData.boothSlots : undefined}
                     name={`categoryLimits.${cat}`}
                     value={
-                      formData.categoryLimits && formData.categoryLimits[cat] !== undefined
+                      formData.categoryLimits && formData.categoryLimits[cat] != null
                         ? formData.categoryLimits[cat]
                         : ""
                     }

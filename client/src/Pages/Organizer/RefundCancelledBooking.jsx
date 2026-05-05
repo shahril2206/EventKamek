@@ -30,7 +30,7 @@ const RefundCancelledBooking = () => {
   const handleRefundSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(`${import.meta.env.API_BASE}/api/removeassignment/${assignmentid}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/removeassignment/${assignmentid}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cancellationremark }),
@@ -48,7 +48,8 @@ const RefundCancelledBooking = () => {
 
 
   return (
-    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border-1 max-w-xl mx-auto p-6 bg-white shadow-md rounded-md !p-5">
+    <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center">
+    <div className="border-1 max-w-xl w-full mx-4 bg-white shadow-md rounded-md !p-5">
       <h2 className="text-2xl font-bold mb-4">Remove Assignment and Refund</h2>
 
       <div className="mb-4">
@@ -93,6 +94,7 @@ const RefundCancelledBooking = () => {
           Pay Now
         </button>
       </form>
+    </div>
     </div>
   );
 };

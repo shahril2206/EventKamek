@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './Components/Header/Header';
 import Footer from './Components/Footer';
 import Events from './Pages/Events';
@@ -17,7 +17,12 @@ import PaymentBooking from './Pages/Vendor/PaymentBooking';
 import RefundCancelledBooking from './Pages/Organizer/RefundCancelledBooking';
 import RefundDeposit from './Pages/Organizer/RefundDeposit';
 
+const NO_FOOTER_ROUTES = ['/RefundCancelledBooking', '/PaymentBooking'];
+
 const App = () => {
+  const location = useLocation();
+  const showFooter = !NO_FOOTER_ROUTES.includes(location.pathname);
+
   return (
     <>
       <Header />
@@ -38,7 +43,7 @@ const App = () => {
         <Route path="/RefundCancelledBooking" element={<RefundCancelledBooking />} />
         <Route path="/RefundDeposit" element={<RefundDeposit />} />
       </Routes>
-      <Footer />
+      {showFooter && <Footer />}
     </>
   )
 }

@@ -47,7 +47,7 @@ const PaymentBooking = () => {
     console.log("➡️ Booking Data Sent:", bookingData);
 
     try {
-      const response = await fetch(`${import.meta.env.API_BASE}/api/bookings`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/bookings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData),
@@ -70,7 +70,8 @@ const PaymentBooking = () => {
 
 
   return (
-    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border-1 max-w-xl mx-auto p-6 bg-white shadow-md rounded-md !p-5">
+    <div className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center">
+    <div className="border-1 max-w-xl w-full mx-4 bg-white shadow-md rounded-md !p-5">
       <h2 className="text-2xl font-bold mb-4">Payment Page</h2>
 
       <div className="mb-4">
@@ -117,6 +118,7 @@ const PaymentBooking = () => {
           Pay Now
         </button>
       </form>
+    </div>
     </div>
   );
 };
