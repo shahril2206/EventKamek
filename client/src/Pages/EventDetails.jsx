@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import VendorCard from '../Components/VendorCard';
 import { useJsApiLoader, GoogleMap, Marker } from '@react-google-maps/api';
 import { Link, useNavigate } from 'react-router-dom';
@@ -20,9 +20,13 @@ const EventDetails = () => {
 
   const [eventData, setEventData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [eventImages, setEventImages] = useState([]);
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -38,10 +42,19 @@ const EventDetails = () => {
         const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/${slug}`);
         const eventData = await response.json();
         console.log('Fetched event data:', eventData);
+        const base = import.meta.env.VITE_API_BASE;
+        // Build ordered list of all available images
+        const imgs = ['eventimage', 'eventimage1', 'eventimage2', 'eventimage3', 'eventimage4']
+          .map(f => eventData[f])
+          .filter(Boolean)
+          .map(f => `${base}/uploads/eventImages/${f}`);
+        setEventImages(imgs);
+        setCarouselIndex(0);
+
         setEventData({
           ...eventData,
-          eventimage: `${import.meta.env.VITE_API_BASE}/uploads/eventImages/${eventData.eventimage}`, // dynamically construct the image path
-          profilepic: `${import.meta.env.VITE_API_BASE}/uploads/organizerPFP/${eventData.profilepic}`, // dynamically construct the organizer profile pic path
+          eventimage: imgs[0] || '',
+          profilepic: `${base}/uploads/organizerPFP/${eventData.profilepic}`,
         });
       } catch (error) {
         console.error('Error fetching event:', error);
@@ -60,6 +73,20 @@ const EventDetails = () => {
     lat: parseFloat(eventData.latitude),
     lng: parseFloat(eventData.longitude),
   };
+
+  const openLightbox = (index) => { setLightboxIndex(index); setLightboxOpen(true); };
+  const closeLightbox = () => setLightboxOpen(false);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') setLightboxIndex(i => (i + 1) % eventImages.length);
+      if (e.key === 'ArrowLeft') setLightboxIndex(i => (i - 1 + eventImages.length) % eventImages.length);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightboxOpen, eventImages.length]);
 
   useStickyHeaderEffect();
 
@@ -100,7 +127,43 @@ const EventDetails = () => {
         <div className="event-details-container">
           <div className="event-details-left">
             <div>
-              <img className="event-details-image" src={eventData.eventimage} alt="eventimage" />
+              {/* Image carousel */}
+              {eventImages.length > 0 ? (
+                <div className="relative">
+                  <img
+                    className="event-details-image cursor-zoom-in"
+                    src={eventImages[carouselIndex]}
+                    alt={`Event image ${carouselIndex + 1}`}
+                    onClick={() => openLightbox(carouselIndex)}
+                  />
+                  {eventImages.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setCarouselIndex(i => (i - 1 + eventImages.length) % eventImages.length)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/70"
+                      >&#8249;</button>
+                      <button
+                        type="button"
+                        onClick={() => setCarouselIndex(i => (i + 1) % eventImages.length)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/70"
+                      >&#8250;</button>
+                      <div className="flex justify-center gap-1 mt-2">
+                        {eventImages.map((_, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setCarouselIndex(i)}
+                            className={`w-2 h-2 rounded-full ${i === carouselIndex ? 'bg-[#15104a]' : 'bg-gray-300'}`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="event-details-image bg-gray-100 flex items-center justify-center text-gray-400 text-sm">No image</div>
+              )}
               <div className="event-details-organizer">
                 <h2 className="heading">Organizer: </h2>
                 <Link to={`/Profile/Organizer/${eventData.organizeremail}`} className="organizer-card hover:shadow-lg transition">
@@ -214,6 +277,49 @@ const EventDetails = () => {
         onClose={() => setIsDeleteOpen(false)}
         currentEvent={eventData}
       />
+
+      {/* Lightbox */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          onClick={closeLightbox}
+        >
+          <button
+            className="absolute top-4 right-5 text-white text-3xl font-bold hover:text-gray-300"
+            onClick={closeLightbox}
+          >&times;</button>
+
+          {eventImages.length > 1 && (
+            <>
+              <button
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-5xl hover:text-gray-300"
+                onClick={e => { e.stopPropagation(); setLightboxIndex(i => (i - 1 + eventImages.length) % eventImages.length); }}
+              >&#8249;</button>
+              <button
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-5xl hover:text-gray-300"
+                onClick={e => { e.stopPropagation(); setLightboxIndex(i => (i + 1) % eventImages.length); }}
+              >&#8250;</button>
+            </>
+          )}
+
+          <img
+            src={eventImages[lightboxIndex]}
+            alt={`Event image ${lightboxIndex + 1}`}
+            className="max-h-[90vh] max-w-[90vw] object-contain"
+            onClick={e => e.stopPropagation()}
+          />
+
+          <div className="absolute bottom-4 flex gap-2">
+            {eventImages.map((_, i) => (
+              <button
+                key={i}
+                onClick={e => { e.stopPropagation(); setLightboxIndex(i); }}
+                className={`w-2 h-2 rounded-full ${i === lightboxIndex ? 'bg-white' : 'bg-white/40'}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   );
 };

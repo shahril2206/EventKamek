@@ -10,6 +10,16 @@ const multer = require('multer');
 const pool = require('./db');
 
 const uploadProfilePic = multer({ storage: multer.memoryStorage() });
+const uploadEventImages = multer({ storage: multer.memoryStorage() });
+
+const eventImagesDir = path.join(__dirname, 'uploads', 'eventImages');
+if (!fs.existsSync(eventImagesDir)) fs.mkdirSync(eventImagesDir, { recursive: true });
+const saveEventImage = (file) => {
+  const ext = path.extname(file.originalname) || '.jpg';
+  const uniqueName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}${ext}`;
+  fs.writeFileSync(path.join(eventImagesDir, uniqueName), file.buffer);
+  return uniqueName;
+};
 
 const app = express();
 app.use(cors());
@@ -640,7 +650,15 @@ app.post('/api/bookings', async (req, res) => {
 const slugify = require('slugify');
 const { send } = require('process');
 
-app.post('/api/events/create', async (req, res) => {
+app.post('/api/events/create',
+  uploadEventImages.fields([
+    { name: 'image_0', maxCount: 1 },
+    { name: 'image_1', maxCount: 1 },
+    { name: 'image_2', maxCount: 1 },
+    { name: 'image_3', maxCount: 1 },
+    { name: 'image_4', maxCount: 1 },
+  ]),
+  async (req, res) => {
   const {
     eventName,
     startDate,
@@ -648,12 +666,10 @@ app.post('/api/events/create', async (req, res) => {
     location,
     eventDetails,
     eventLink,
-    image,
     status,
     includeVendorBooth,
     bookingClosingDate,
     boothSlots,
-    categoryLimits,
     boothFee,
     refundableDepoAmt,
     nonRefundableDepoAmt,
@@ -662,6 +678,19 @@ app.post('/api/events/create', async (req, res) => {
     lng,
     organizeremail,
   } = req.body;
+
+  const categoryLimits = JSON.parse(req.body.categoryLimits || '{}');
+  const includeVendorBoothBool = includeVendorBooth === 'true';
+  const boothSlotsNum = boothSlots ? parseInt(boothSlots, 10) : null;
+
+  // Save up to 5 event images
+  const imageFilenames = [null, null, null, null, null];
+  for (let i = 0; i < 5; i++) {
+    if (req.files?.[`image_${i}`]?.[0]) {
+      imageFilenames[i] = saveEventImage(req.files[`image_${i}`][0]);
+    }
+  }
+  const [img0, img1, img2, img3, img4] = imageFilenames;
 
   const slug = slugify(eventName, { lower: true });
 
@@ -674,36 +703,43 @@ app.post('/api/events/create', async (req, res) => {
     const insertEventResult = await client.query(`
       INSERT INTO events (
         eventname, eventslug, eventstartdate, eventenddate, eventlocation,
-        latitude, longitude, eventdetails, eventimage, eventextlink, status, boothbookingenabled,
+        latitude, longitude, eventdetails,
+        eventimage, eventimage1, eventimage2, eventimage3, eventimage4,
+        eventextlink, status, boothbookingenabled,
         bookingclosingdate, boothslots,
         foodboothlimit, clothingboothlimit, toysboothlimit, craftboothlimit,
         booksboothlimit, accessoriesboothlimit, otherboothlimit,
         boothfee, refundabledepo, nonrefundabledepo, fullpayment, organizeremail
       ) VALUES (
         $1, $2, $3, $4, $5,
-        $6, $7, $8, $9, $10,
-        $11, $12,
-        $13, $14, $15, $16,
-        $17, $18, $19,
-        $20, $21, $22, $23, $24, $25, $26
+        $6, $7, $8,
+        $9, $10, $11, $12, $13,
+        $14, $15, $16,
+        $17, $18, $19, $20,
+        $21, $22, $23, $24, $25, $26, $27,
+        $28, $29, $30
       )
       RETURNING eventid
     `, [
       eventName, slug, startDate, endDate, location,
-      lat, lng, eventDetails, image, eventLink, status, includeVendorBooth,
-      bookingClosingDate, boothSlots || null,
-      categoryLimits?.Food, categoryLimits?.Clothing, categoryLimits?.Toys, categoryLimits?.Craft,
-      categoryLimits?.Books, categoryLimits?.Accessories, categoryLimits?.Other,
-      boothFee, refundableDepoAmt, nonRefundableDepoAmt, fullPayment, organizeremail,
+      lat || null, lng || null, eventDetails,
+      img0, img1, img2, img3, img4,
+      eventLink, status || 'Upcoming', includeVendorBoothBool,
+      bookingClosingDate || null, boothSlotsNum,
+      categoryLimits?.Food || null, categoryLimits?.Clothing || null,
+      categoryLimits?.Toys || null, categoryLimits?.Craft || null,
+      categoryLimits?.Books || null, categoryLimits?.Accessories || null,
+      categoryLimits?.Other || null,
+      boothFee || null, refundableDepoAmt || null, nonRefundableDepoAmt || null,
+      fullPayment || null, organizeremail,
     ]);
 
     const newEventId = insertEventResult.rows[0].eventid;
 
     // 2. Insert booths only if includeVendorBooth is true and boothSlots > 0
-    if (includeVendorBooth) {
+    if (includeVendorBoothBool && boothSlotsNum) {
       const insertBoothsPromises = [];
-
-      for (let i = 1; i <= boothSlots; i++) {
+      for (let i = 1; i <= boothSlotsNum; i++) {
         insertBoothsPromises.push(
           client.query(
             `INSERT INTO booth (eventid, boothno, isassigned) VALUES ($1, $2, $3)`,
@@ -711,7 +747,6 @@ app.post('/api/events/create', async (req, res) => {
           )
         );
       }
-
       await Promise.all(insertBoothsPromises);
     }
 
@@ -728,29 +763,66 @@ app.post('/api/events/create', async (req, res) => {
 
 
 // =========== UPDATE EVENT =============
-app.put('/api/events/update/:slug', async (req, res) => {
+app.put('/api/events/update/:slug',
+  uploadEventImages.fields([
+    { name: 'image_0', maxCount: 1 },
+    { name: 'image_1', maxCount: 1 },
+    { name: 'image_2', maxCount: 1 },
+    { name: 'image_3', maxCount: 1 },
+    { name: 'image_4', maxCount: 1 },
+  ]),
+  async (req, res) => {
   const { slug } = req.params;
 
-  // 🧹 Normalize undefined or '' to null
-  const normalize = (v) => v === '' || v === undefined ? null : v;
+  const normalize = (v) => v === '' || v === undefined || v === 'null' ? null : v;
+
+  const categoryLimits = JSON.parse(req.body.categoryLimits || '{}');
+  const slotConfig = JSON.parse(req.body.slotConfig || 'null');
 
   const data = {
-    ...req.body,
+    eventName: req.body.eventName,
+    startDate: req.body.startDate,
+    endDate: req.body.endDate,
+    location: req.body.location,
+    lat: normalize(req.body.lat),
+    lng: normalize(req.body.lng),
+    eventDetails: req.body.eventDetails,
+    eventLink: req.body.eventLink,
+    includeVendorBooth: req.body.includeVendorBooth === 'true',
+    closingBookingDate: normalize(req.body.closingBookingDate),
+    boothSlots: normalize(req.body.boothSlots),
     boothFee: normalize(req.body.boothFee),
     refundableDepoAmt: normalize(req.body.refundableDepoAmt),
     nonRefundableDepoAmt: normalize(req.body.nonRefundableDepoAmt),
-    boothSlots: normalize(req.body.boothSlots),
-    closingBookingDate: normalize(req.body.closingBookingDate),
+    fullPayment: normalize(req.body.fullPayment),
     categoryLimits: {
-      Food: normalize(req.body.categoryLimits?.Food),
-      Clothing: normalize(req.body.categoryLimits?.Clothing),
-      Toys: normalize(req.body.categoryLimits?.Toys),
-      Craft: normalize(req.body.categoryLimits?.Craft),
-      Books: normalize(req.body.categoryLimits?.Books),
-      Accessories: normalize(req.body.categoryLimits?.Accessories),
-      Other: normalize(req.body.categoryLimits?.Other),
+      Food: normalize(categoryLimits.Food),
+      Clothing: normalize(categoryLimits.Clothing),
+      Toys: normalize(categoryLimits.Toys),
+      Craft: normalize(categoryLimits.Craft),
+      Books: normalize(categoryLimits.Books),
+      Accessories: normalize(categoryLimits.Accessories),
+      Other: normalize(categoryLimits.Other),
     },
   };
+
+  // Resolve image filenames for each slot from slotConfig
+  const imageFilenames = [null, null, null, null, null];
+  if (slotConfig) {
+    for (let i = 0; i < 5; i++) {
+      const slot = slotConfig[i];
+      if (!slot || slot.action === 'remove') {
+        imageFilenames[i] = null;
+      } else if (slot.action === 'keep') {
+        imageFilenames[i] = slot.filename;
+      } else if (slot.action === 'new') {
+        if (req.files?.[`image_${i}`]?.[0]) {
+          imageFilenames[i] = saveEventImage(req.files[`image_${i}`][0]);
+        }
+      }
+    }
+  }
+  const [img0, img1, img2, img3, img4] = imageFilenames;
 
   try {
     console.log('🔍 Updated event data:', data);
@@ -778,8 +850,13 @@ app.put('/api/events/update/:slug', async (req, res) => {
         boothfee = $19,
         refundabledepo = $20,
         nonrefundabledepo = $21,
-        fullpayment = $22
-      WHERE eventslug = $23`,
+        fullpayment = $22,
+        eventimage = $23,
+        eventimage1 = $24,
+        eventimage2 = $25,
+        eventimage3 = $26,
+        eventimage4 = $27
+      WHERE eventslug = $28`,
       [
         data.eventName,
         data.startDate,
@@ -803,6 +880,7 @@ app.put('/api/events/update/:slug', async (req, res) => {
         data.refundableDepoAmt,
         data.nonRefundableDepoAmt,
         data.fullPayment,
+        img0, img1, img2, img3, img4,
         slug,
       ]
     );

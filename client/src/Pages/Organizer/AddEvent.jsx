@@ -67,7 +67,26 @@ const AddEvent = () => {
     fullPayment: "",
   });
 
-  const [previewImage, setPreviewImage] = useState(null);
+  // imageSlots: array of 5, each null | { file: File, preview: string }
+  const [imageSlots, setImageSlots] = useState([null, null, null, null, null]);
+
+  const handleImageAdd = (slotIndex, file) => {
+    if (!file) return;
+    const preview = URL.createObjectURL(file);
+    setImageSlots(prev => {
+      const next = [...prev];
+      next[slotIndex] = { file, preview };
+      return next;
+    });
+  };
+
+  const handleImageRemove = (slotIndex) => {
+    setImageSlots(prev => {
+      const next = [...prev];
+      next[slotIndex] = null;
+      return next;
+    });
+  };
 
   const reverseGeocodeLatLng = (latLng) => {
     if (!geocoder.current) return;
@@ -139,41 +158,20 @@ const AddEvent = () => {
   }, [locationInput, map]);
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'eventImage' && files[0]) {
-      setFormData({ ...formData, image: files[0] });
-      setPreviewImage(URL.createObjectURL(files[0]));
-    } else {
-      setFormData({ ...formData, [name]: value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
 
-      if (name === 'location') {
-  setFormData({ ...formData, location: value });
-
-  // Geocode after user types address
-  if (geocoder.current) {
-    geocoder.current.geocode({ address: value }, (results, status) => {
-      if (status === 'OK' && results[0]) {
-        const latLng = results[0].geometry.location;
-        const coords = {
-          lat: latLng.lat(),
-          lng: latLng.lng(),
-        };
-        setMarkerPosition(coords);
-
-        // ✅ Delay panning slightly to ensure map is updated
-        if (map) {
-            setTimeout(() => {
-              map.panTo(coords);
-              map.setZoom(16); // Optional: zoom into location
-            }, 200);
-          }
+    if (name === 'location' && geocoder.current) {
+      geocoder.current.geocode({ address: value }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          const latLng = results[0].geometry.location;
+          const coords = { lat: latLng.lat(), lng: latLng.lng() };
+          setMarkerPosition(coords);
+          if (map) setTimeout(() => { map.panTo(coords); map.setZoom(16); }, 200);
         } else {
           console.warn('Geocoding failed:', status);
         }
       });
-    }
-  }
-
     }
   };
 
@@ -191,32 +189,7 @@ const AddEvent = () => {
     parseFloat(formData.refundableDepoAmt || 0) +
     parseFloat(formData.nonRefundableDepoAmt || 0);
 
-    const payload = {
-      ...formData,
-      bookingClosingDate: formData.bookingClosingDate || null,
-      boothSlots: formData.boothSlots === 0 || formData.boothSlots === "" ? null : cleanValue(formData.boothSlots),
-      boothFee: cleanValue(formData.boothFee),
-      refundableDepoAmt: cleanValue(formData.refundableDepoAmt),
-      nonRefundableDepoAmt: cleanValue(formData.nonRefundableDepoAmt),
-      fullPayment: fullPaymentValue,
-      categoryLimits: {
-        Food: cleanValue(formData.categoryLimits?.Food),
-        Clothing: cleanValue(formData.categoryLimits?.Clothing),
-        Toys: cleanValue(formData.categoryLimits?.Toys),
-        Craft: cleanValue(formData.categoryLimits?.Craft),
-        Books: cleanValue(formData.categoryLimits?.Books),
-        Accessories: cleanValue(formData.categoryLimits?.Accessories),
-        Other: cleanValue(formData.categoryLimits?.Other),
-      },
-      lat: markerPosition?.lat || null,
-      lng: markerPosition?.lng || null,
-      organizeremail: localStorage.getItem('email'),
-      status: 'Upcoming',
-      image: 'dummy.jpg',
-    };
-
     // Validate: only error if ALL categories have limits set and their sum < boothSlots
-    // If any category is blank/null (no limit), it can absorb remaining slots — no error needed
     if (formData.includeVendorBooth && formData.boothSlots) {
       const totalSlots = parseInt(formData.boothSlots, 10);
       const limitValues = Object.values(formData.categoryLimits);
@@ -230,13 +203,43 @@ const AddEvent = () => {
       }
     }
 
+    const payload = new FormData();
+    payload.append('eventName', formData.eventName);
+    payload.append('startDate', formData.startDate || '');
+    payload.append('endDate', formData.endDate || '');
+    payload.append('location', formData.location || '');
+    payload.append('eventDetails', formData.eventDetails || '');
+    payload.append('eventLink', formData.eventLink || '');
+    payload.append('status', 'Upcoming');
+    payload.append('includeVendorBooth', formData.includeVendorBooth.toString());
+    payload.append('bookingClosingDate', formData.bookingClosingDate || '');
+    payload.append('boothSlots', formData.boothSlots === "" ? '' : (cleanValue(formData.boothSlots) ?? ''));
+    payload.append('boothFee', cleanValue(formData.boothFee) ?? '');
+    payload.append('refundableDepoAmt', cleanValue(formData.refundableDepoAmt) ?? '');
+    payload.append('nonRefundableDepoAmt', cleanValue(formData.nonRefundableDepoAmt) ?? '');
+    payload.append('fullPayment', fullPaymentValue);
+    payload.append('categoryLimits', JSON.stringify({
+      Food: cleanValue(formData.categoryLimits?.Food),
+      Clothing: cleanValue(formData.categoryLimits?.Clothing),
+      Toys: cleanValue(formData.categoryLimits?.Toys),
+      Craft: cleanValue(formData.categoryLimits?.Craft),
+      Books: cleanValue(formData.categoryLimits?.Books),
+      Accessories: cleanValue(formData.categoryLimits?.Accessories),
+      Other: cleanValue(formData.categoryLimits?.Other),
+    }));
+    payload.append('lat', markerPosition?.lat ?? '');
+    payload.append('lng', markerPosition?.lng ?? '');
+    payload.append('organizeremail', localStorage.getItem('email'));
+
+    // Attach image files for each slot
+    imageSlots.forEach((slot, i) => {
+      if (slot?.file) payload.append(`image_${i}`, slot.file);
+    });
+
     try {
       const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/create`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        body: payload,
       });
 
       const data = await res.json();
@@ -322,34 +325,35 @@ const AddEvent = () => {
               Lng: {markerPosition ? markerPosition.lng.toFixed(5) : '-'}
             </p>
 
-            <label>Event Image:</label>
-            {!previewImage ? (
-              <input
-                type="file"
-                accept="image/*"
-                name="eventImage"
-                onChange={handleChange}
-              />
-            ) : (
-              <div className="image-preview-wrapper" style={{ position: 'relative' }}>
-                <img
-                  src={previewImage}
-                  alt="Preview"
-                  className="preview-image"
-                />
-                <button
-                  type="button"
-                  className="remove-image-btn"
-                  onClick={() => {
-                    setPreviewImage(null);
-                    setFormData({ ...formData, image: null });
-                  }}
-                  title="Remove image"
-                >
-                  ×
-                </button>
-              </div>
-            )}
+            <label>Event Images <span className="!text-sm !text-gray-400 italic">(up to 5; first image = main thumbnail)</span>:</label>
+            <div className="flex flex-wrap gap-3">
+              {imageSlots.map((slot, i) => (
+                <div key={i} className="relative w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+                  {slot ? (
+                    <>
+                      <img src={slot.preview} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleImageRemove(i)}
+                        className="absolute top-0 right-0 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-bl-lg"
+                        title="Remove"
+                      >×</button>
+                    </>
+                  ) : (
+                    <label className="cursor-pointer flex flex-col items-center text-gray-400 text-xs text-center p-1">
+                      <span className="text-2xl leading-none">+</span>
+                      <span>{i === 0 ? 'Main' : `Img ${i + 1}`}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={e => handleImageAdd(i, e.target.files[0])}
+                      />
+                    </label>
+                  )}
+                </div>
+              ))}
+            </div>
 
             <label>Event Details:</label>
             <textarea

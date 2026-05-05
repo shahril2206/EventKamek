@@ -25,7 +25,8 @@ const EditEvent = () => {
   const { slug } = useParams();
   const [formData, setFormData] = useState(null);
   const [locationInput, setLocationInput] = useState('');
-  const [previewImage, setPreviewImage] = useState('');
+  // imageSlots: array of 5, each null | { status:'existing', filename, preview } | { status:'new', file, preview }
+  const [imageSlots, setImageSlots] = useState([null, null, null, null, null]);
   
 
 
@@ -145,34 +146,22 @@ const EditEvent = () => {
                       parseFloat(data.nonrefundabledepo || 0)),
       });
 
-      setLocationInput(data.location);
+      setLocationInput(data.eventlocation);
       setMarkerPosition({ lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) });
-      setPreviewImage(`http://localhost:3000/uploads/eventImages/${data.eventimage}`);
+
+      // Populate image slots from existing event images
+      const imgFields = ['eventimage', 'eventimage1', 'eventimage2', 'eventimage3', 'eventimage4'];
+      setImageSlots(imgFields.map(field =>
+        data[field]
+          ? { status: 'existing', filename: data[field], preview: `${import.meta.env.VITE_API_BASE}/uploads/eventImages/${data[field]}` }
+          : null
+      ));
     } catch (error) {
       console.error('Failed to fetch event data:', error.message);
     }
   };
 
   fetchEventData();
-
-  if (formData?.location) {
-    setLocationInput(formData.location);
-  }
-
-  if (formData?.lat && formData?.lng) {
-    initialCenter.current = {
-      lat: parseFloat(formData.lat),
-      lng: parseFloat(formData.lng),
-    };
-  }
-
-  if (formData?.image) {
-    const image =
-      typeof formData.image === 'string'
-        ? formData.image
-        : URL.createObjectURL(formData.image);
-    setPreviewImage(image);
-  }
 
     const timeoutId = setTimeout(() => {
       if (locationInput && geocoder.current) {
@@ -200,43 +189,39 @@ const EditEvent = () => {
     return () => clearTimeout(timeoutId);
   }, [locationInput, map, slug]);
 
+  const handleImageAdd = (slotIndex, file) => {
+    if (!file) return;
+    setImageSlots(prev => {
+      const next = [...prev];
+      next[slotIndex] = { status: 'new', file, preview: URL.createObjectURL(file) };
+      return next;
+    });
+  };
+
+  const handleImageRemove = (slotIndex) => {
+    setImageSlots(prev => {
+      const next = [...prev];
+      next[slotIndex] = null;
+      return next;
+    });
+  };
+
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'eventImage' && files[0]) {
-      setFormData({ ...formData, image: files[0] });
-      setPreviewImage(URL.createObjectURL(files[0]));
-    } else {
-      setFormData({ ...formData, [name]: value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
 
-      if (name === 'location') {
-      setFormData({ ...formData, location: value });
-
-      // Geocode after user types address
-      if (geocoder.current) {
-        geocoder.current.geocode({ address: value }, (results, status) => {
-          if (status === 'OK' && results[0]) {
-            const latLng = results[0].geometry.location;
-            const coords = {
-              lat: latLng.lat(),
-              lng: latLng.lng(),
-            };
-            setMarkerPosition(coords);
-
-            // ✅ Delay panning slightly to ensure map is updated
-            if (map) {
-                setTimeout(() => {
-                  map.panTo(coords);
-                  map.setZoom(16); // Optional: zoom into location
-                }, 200);
-              }
-            } else {
-              console.warn('Geocoding failed:', status);
-            }
-          });
+    if (name === 'location' && geocoder.current) {
+      geocoder.current.geocode({ address: value }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          const latLng = results[0].geometry.location;
+          const coords = { lat: latLng.lat(), lng: latLng.lng() };
+          setMarkerPosition(coords);
+          if (map) setTimeout(() => { map.panTo(coords); map.setZoom(16); }, 200);
+        } else {
+          console.warn('Geocoding failed:', status);
         }
-      }
-
-        }
+      });
+    }
   };
 
 
@@ -282,13 +267,41 @@ const EditEvent = () => {
       }
     }
 
+    // Build slotConfig and FormData for image slots
+    const slotConfig = imageSlots.map(slot => {
+      if (!slot) return { action: 'remove' };
+      if (slot.status === 'existing') return { action: 'keep', filename: slot.filename };
+      return { action: 'new' };
+    });
+
+    const payload = new FormData();
+    payload.append('eventName', updatedFormData.eventName || '');
+    payload.append('startDate', updatedFormData.startDate || '');
+    payload.append('endDate', updatedFormData.endDate || '');
+    payload.append('location', updatedFormData.location || '');
+    payload.append('lat', updatedFormData.lat ?? '');
+    payload.append('lng', updatedFormData.lng ?? '');
+    payload.append('eventDetails', updatedFormData.eventDetails || '');
+    payload.append('eventLink', updatedFormData.eventLink || '');
+    payload.append('includeVendorBooth', updatedFormData.includeVendorBooth.toString());
+    payload.append('closingBookingDate', updatedFormData.closingBookingDate ?? '');
+    payload.append('boothSlots', updatedFormData.boothSlots ?? '');
+    payload.append('boothFee', updatedFormData.boothFee ?? '');
+    payload.append('refundableDepoAmt', updatedFormData.refundableDepoAmt ?? '');
+    payload.append('nonRefundableDepoAmt', updatedFormData.nonRefundableDepoAmt ?? '');
+    payload.append('fullPayment', updatedFormData.fullPayment ?? '');
+    payload.append('categoryLimits', JSON.stringify(updatedFormData.categoryLimits));
+    payload.append('slotConfig', JSON.stringify(slotConfig));
+
+    // Attach new image files
+    imageSlots.forEach((slot, i) => {
+      if (slot?.status === 'new') payload.append(`image_${i}`, slot.file);
+    });
+
     try {
-      const response = await fetch(`http://localhost:3000/api/events/update/${slug}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/events/update/${slug}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updatedFormData),
+        body: payload,
       });
 
       const result = await response.json();
@@ -375,34 +388,35 @@ const EditEvent = () => {
               Lat: {markerPosition ? markerPosition.lat.toFixed(5) : '-'}; 
               Lng: {markerPosition ? markerPosition.lng.toFixed(5) : '-'}
             </p>
-            <label>Event Image:</label>
-            {!previewImage ? (
-              <input
-                type="file"
-                accept="image/*"
-                name="eventImage"
-                onChange={handleChange}
-              />
-            ) : (
-              <div className="image-preview-wrapper" style={{ position: 'relative' }}>
-                <img
-                  src={previewImage}
-                  alt="Preview"
-                  className="preview-image"
-                />
-                <button
-                  type="button"
-                  className="remove-image-btn"
-                  onClick={() => {
-                    setPreviewImage(null);
-                    setFormData({ ...formData, image: null });
-                  }}
-                  title="Remove image"
-                >
-                  ×
-                </button>
-              </div>
-            )}
+            <label>Event Images <span className="!text-sm !text-gray-400 italic">(up to 5; first image = main thumbnail)</span>:</label>
+            <div className="flex flex-wrap gap-3">
+              {imageSlots.map((slot, i) => (
+                <div key={i} className="relative w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center overflow-hidden">
+                  {slot ? (
+                    <>
+                      <img src={slot.preview} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleImageRemove(i)}
+                        className="absolute top-0 right-0 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-bl-lg"
+                        title="Remove"
+                      >×</button>
+                    </>
+                  ) : (
+                    <label className="cursor-pointer flex flex-col items-center text-gray-400 text-xs text-center p-1">
+                      <span className="text-2xl leading-none">+</span>
+                      <span>{i === 0 ? 'Main' : `Img ${i + 1}`}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={e => handleImageAdd(i, e.target.files[0])}
+                      />
+                    </label>
+                  )}
+                </div>
+              ))}
+            </div>
 
             <label>Event Details:</label>
             <textarea

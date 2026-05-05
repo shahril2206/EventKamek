@@ -218,7 +218,7 @@ main {
 }
 
 .event-card img {
-  @apply w-45 h-45 rounded-lg;
+  @apply w-45 h-45 rounded-lg object-cover shrink-0;
 }
 
 .event-card-details {
@@ -250,7 +250,7 @@ main {
 }
 
 .event-details-left img {
-  @apply rounded-lg object-cover w-full mb-5 border-1 border-gray-300 shadow-lg shadow-gray-200/50;
+  @apply rounded-lg object-contain w-full mb-5 border-1 border-gray-300 shadow-lg shadow-gray-200/50;
   max-height: 400px;
   height: auto;
 }
