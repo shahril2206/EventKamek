@@ -35,21 +35,19 @@ const Registration = () => {
       return;
     }
 
-    const payload = {
-      role,
-      name,
-      email,
-      contactNo,
-      password,
-    };
+    const payload = new FormData();
+    payload.append('role', role);
+    payload.append('name', name);
+    payload.append('email', email);
+    payload.append('contactNo', contactNo);
+    payload.append('password', password);
+    const file = fileInputRef.current?.files[0];
+    if (file) payload.append('profilePic', file);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/register`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        body: payload, // no Content-Type header — browser sets it with boundary automatically
       });
 
       const data = await response.json();

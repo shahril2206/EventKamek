@@ -642,7 +642,7 @@ main {
 }
 
 .profile-picture {
-  @apply rounded-full border-1 shadow-lg shadow-gray-200/50 ml-2;
+  @apply w-36 h-36 rounded-full border-1 shadow-lg shadow-gray-200/50 ml-2 object-cover;
 }
 
 .profile-info {
@@ -910,7 +910,7 @@ main {
 }
 
 .edit-profile-left img {
-  @apply w-40 h-40 rounded-full border-1 border-gray-300 shadow-lg shadow-gray-200/50;
+  @apply w-40 h-40 rounded-full border-1 border-gray-300 shadow-lg shadow-gray-200/50 object-cover;
   @apply mx-auto;
 }
 

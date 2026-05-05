@@ -44,34 +44,35 @@ const EditProfileModal = ({ isOpen, onClose, currentData, onSave }) => {
     const email = localStorage.getItem('email');
     const role = localStorage.getItem('role');
 
+    const payload = new FormData();
+    payload.append('role', role);
+    payload.append('email', email);
+    payload.append('name', formData.name || '');
+    payload.append('contactnum', formData.contactnum || '');
+    payload.append('facebooklink', formData.facebooklink === '-' ? '' : (formData.facebooklink || ''));
+    payload.append('instagramlink', formData.instagramlink === '-' ? '' : (formData.instagramlink || ''));
+    payload.append('tiktoklink', formData.tiktoklink === '-' ? '' : (formData.tiktoklink || ''));
+    payload.append('websitelink', formData.websitelink === '-' ? '' : (formData.websitelink || ''));
+    payload.append('aboutus', formData.aboutus || '');
+    if (newProfilePic) {
+      payload.append('profilepic', newProfilePic);
+    }
+
     try {
       const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/profile/update`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          role,
-          email,
-          name: formData.name,
-          contactnum: formData.contactnum,
-          facebooklink: formData.facebooklink === '-' ? '' : formData.facebooklink,
-          instagramlink: formData.instagramlink === '-' ? '' : formData.instagramlink,
-          tiktoklink: formData.tiktoklink === '-' ? '' : formData.tiktoklink,
-          websitelink: formData.websitelink === '-' ? '' : formData.websitelink,
-          aboutus: formData.aboutus,
-        }),
+        body: payload, // no Content-Type header — browser sets it automatically with boundary
       });
 
       const result = await res.json();
       if (res.ok) {
         alert('Profile successfully updated!');
-        onSave(formData);
-        onClose();          // ✅ Close modal
+        onSave(formData, result.profilepic);
+        onClose();
       } else {
         console.error('Update failed:', result.error);
         window.alert(result.error || 'Failed to update profile.');
-        onclose(); // ✅ Close modal
+        onClose();
       }
     } catch (err) {
       console.error('❌ Error during profile update:', err);

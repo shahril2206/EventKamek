@@ -71,18 +71,22 @@ const MyProfile = () => {
   }, []);
 
   // ✅ Sync updated data from modal back to profile state
-  const handleSave = (updatedData) => {
-    setProfile({
+  const handleSave = (updatedData, newProfilepicFilename) => {
+    const role = localStorage.getItem('role');
+    const folder = role === 'organizer' ? 'organizerPFP' : 'vendorPFP';
+    const picFilename = newProfilepicFilename || profile.profilePic?.split('/').pop() || 'dummyProfilePic.png';
+
+    setProfile(prev => ({
+      ...prev,
       name: updatedData.name,
-      email: updatedData.email,
       contactnum: updatedData.contactnum,
-      profilePic: `${import.meta.env.VITE_API_BASE}/uploads/vendorPFP/${updatedData.profilepic || 'dummyProfilePic.png'}`,
+      profilePic: `${import.meta.env.VITE_API_BASE}/uploads/${folder}/${picFilename}`,
       facebooklink: updatedData.facebooklink || '-',
       instagramlink: updatedData.instagramlink || '-',
       tiktoklink: updatedData.tiktoklink || '-',
       websitelink: updatedData.websitelink || '-',
       aboutus: updatedData.aboutus || 'No description available.',
-    });
+    }));
   };
 
   // Optional: Show loading state while profile is being fetched

@@ -5,7 +5,11 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const pool = require('./db');
+
+const uploadProfilePic = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 app.use(cors());
@@ -397,7 +401,7 @@ const sendEventUpdateEmailToVendor = async (
 })();
 
 // ========== REGISTER ROUTE ==========
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', uploadProfilePic.single('profilePic'), async (req, res) => {
   const { role, name, email, contactNo, password } = req.body;
 
   if (!role || !name || !email || !contactNo || !password) {
@@ -422,10 +426,19 @@ app.post('/api/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    let profilepicFilename = 'dummyProfilePic.png';
+    if (req.file) {
+      const folder = role === 'organizer' ? 'organizerPFP' : 'vendorPFP';
+      const ext = path.extname(req.file.originalname);
+      profilepicFilename = `${Date.now()}${ext}`;
+      const uploadPath = path.join(__dirname, 'uploads', folder, profilepicFilename);
+      fs.writeFileSync(uploadPath, req.file.buffer);
+    }
+
     await pool.query(
       `INSERT INTO ${table} (${nameColumn}, ${emailColumn}, contactnum, password, profilepic)
        VALUES ($1, $2, $3, $4, $5)`,
-      [name, email, contactNo, hashedPassword, "dummyProfilePic.png"]
+      [name, email, contactNo, hashedPassword, profilepicFilename]
     );
 
     res.json({ success: true, message: 'Registration successful' });
@@ -893,7 +906,7 @@ app.get('/api/vendor/myprofile', async (req, res) => {
 
 // ========== UPDATE PROFILE ==========
 
-app.put('/api/profile/update', async (req, res) => {
+app.put('/api/profile/update', uploadProfilePic.single('profilepic'), async (req, res) => {
   const {
     role, email, name, contactnum,
     facebooklink, instagramlink, tiktoklink,
@@ -921,8 +934,34 @@ app.put('/api/profile/update', async (req, res) => {
   }[role];
 
   try {
-    const result = await pool.query(
-      `UPDATE ${table} SET
+    let profilepicFilename = null;
+
+    if (req.file) {
+      const folder = role === 'organizer' ? 'organizerPFP' : 'vendorPFP';
+      const ext = path.extname(req.file.originalname);
+      profilepicFilename = `${Date.now()}${ext}`;
+      const uploadPath = path.join(__dirname, 'uploads', folder, profilepicFilename);
+      fs.writeFileSync(uploadPath, req.file.buffer);
+    }
+
+    const queryValues = [name, contactnum, facebooklink, instagramlink, tiktoklink, websitelink, aboutus];
+
+    let query;
+    if (profilepicFilename) {
+      queryValues.push(profilepicFilename, email);
+      query = `UPDATE ${table} SET
+        ${updates.nameCol} = $1,
+        ${updates.contactCol} = $2,
+        facebooklink = $3,
+        instagramlink = $4,
+        tiktoklink = $5,
+        websitelink = $6,
+        aboutus = $7,
+        profilepic = $8
+      WHERE ${updates.emailCol} = $9`;
+    } else {
+      queryValues.push(email);
+      query = `UPDATE ${table} SET
         ${updates.nameCol} = $1,
         ${updates.contactCol} = $2,
         facebooklink = $3,
@@ -930,15 +969,16 @@ app.put('/api/profile/update', async (req, res) => {
         tiktoklink = $5,
         websitelink = $6,
         aboutus = $7
-      WHERE ${updates.emailCol} = $8`,
-      [name, contactnum, facebooklink, instagramlink, tiktoklink, websitelink, aboutus, email]
-    );
+      WHERE ${updates.emailCol} = $8`;
+    }
+
+    const result = await pool.query(query, queryValues);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Profile not found or not updated' });
     }
 
-    res.json({ success: true, message: 'Profile updated successfully' });
+    res.json({ success: true, message: 'Profile updated successfully', profilepic: profilepicFilename });
   } catch (err) {
     console.error('❌ Profile update error:', err);
     res.status(500).json({ error: 'Failed to update profile', details: err.message });
