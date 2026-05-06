@@ -242,44 +242,45 @@ main {
 
 .event-details-container {
   @apply grid w-92/100 h-full;
-  grid-template-columns: 1fr 1fr;
 }
 
-.event-details-left {
-  @apply pr-10 pb-5;
+.event-details-top {
+  @apply mt-3 mb-5;
 }
 
-.event-details-left img {
-  @apply rounded-lg object-contain w-full mb-5 border-1 border-gray-300 shadow-lg shadow-gray-200/50;
-  max-height: 400px;
+.event-details-top img {
+  @apply rounded-lg object-contain mx-auto w-[90%] mb-5 border-1 border-gray-300 shadow-lg shadow-gray-200/50;
+  background-color: rgba(243, 244, 246, 0.7);
+  max-height: 500px;
   height: auto;
 }
 
-.event-details-right {
-  @apply pl-3 rounded-lg shadow-gray-200/50 shadow-lg h-fit;
+.event-details-middle {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6 items-start justify-center w-full h-auto mt-7 mb-6;
+  position: relative;
 }
 
-.event-details-venue-date {
-  @apply bg-[#f7f5f5] rounded-lg p-5 shadow-gray-200/50 shadow-lg h-fit;
+.event-details-middle-L {
+  @apply bg-[#fefefe] rounded-lg p-5 shadow-gray-200/50 shadow-lg h-fit;
 }
 
-.event-details-right .date {
+.event-details-middle .date {
   @apply flex mb-3;
 }
 
-.event-details-right .date h3 {
+.event-details-middle .date h3 {
   @apply font-bold underline;
 }
 
-.event-details-right .date p {
+.event-details-middle .date p {
   @apply ml-3;
 }
 
-.event-details-right .location h3 {
+.event-details-middle .location h3 {
   @apply font-bold underline;
 }
 
-.event-details-vendor-section {
+.event-details-bottom {
   @apply mt-10;
 }
 
@@ -287,20 +288,15 @@ main {
   @apply flex items-center justify-between mb-3;
 }
 
-.event-details-organizer {
-  @apply flex items-center gap-4 mt-4;
-}
-
-.organizer-card {
-  @apply grid items-center bg-[#fefefe] h-17 w-fit pl-2 pr-5 rounded-md border-1 border-gray-200 shadow cursor-pointer;
-  grid-template-columns: auto auto;
+.event-details-middle .organizer-card {
+  @apply flex items-center bg-[#fefefe] w-full h-17 w-fit pl-2 pr-5 mb-3 rounded-md border-1 border-gray-200 shadow-gray-200/50 cursor-pointer;
 }
 
 .organizer-card img {
   @apply w-13 h-13 object-cover rounded-full mr-3 border-1 border-gray-300 shadow my-auto;
 }
 
-.event-details-vendor-section h2, .event-details-left h2{
+.event-details-bottom h2, .event-details-top h2{
   @apply font-bold underline text-[#15104a] mb-1;
 }
 
@@ -331,7 +327,7 @@ main {
 }
 
 .vendor-list {
-  @apply mt-3;
+  @apply mt-3 grid grid-flow-row grid-cols-2 gap-4;
 }
 
 .vendor-card {
@@ -706,8 +702,8 @@ main {
 }
 
 .payment-info-section {
-  @apply bg-[#fefefe] border-1 border-gray-200 w-fit h-auto rounded-md px-4 py-2;
-  @apply shadow-gray-300 shadow-sm;
+  @apply border-1 w-full border-collapse border border-gray-500;
+  @apply shadow-gray-200/50;
 }
 
 .payment-info-section strong {

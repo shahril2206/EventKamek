@@ -25,7 +25,7 @@ const VendorList = ({ eventId, isTheOrganizer }) => {
   if (!vendors.length) return <p>No vendors assigned yet.</p>;
 
   return (
-    <div className="vendor-list">
+    <>
       {vendors.map((vendor, index) => (
         <VendorCard
           key={index}
@@ -33,7 +33,7 @@ const VendorList = ({ eventId, isTheOrganizer }) => {
           isTheOrganizer={isTheOrganizer}
         />
       ))}
-    </div>
+    </>
   );
 };
 

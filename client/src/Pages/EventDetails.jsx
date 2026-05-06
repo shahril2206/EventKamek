@@ -11,7 +11,7 @@ import VendorList from '../Components/VendorList';
 
 const mapContainerStyle = {
   width: '100%',
-  height: '200px',
+  height: '300px',
   borderRadius: '12px',
 };
 
@@ -125,72 +125,49 @@ const EventDetails = () => {
       <div className="content-container">
         <div className="border-b-1"></div>
         <div className="event-details-container">
-          <div className="event-details-left">
-            <div>
-              {/* Image carousel */}
-              {eventImages.length > 0 ? (
-                <div className="relative">
-                  <img
-                    className="event-details-image cursor-zoom-in"
-                    src={eventImages[carouselIndex]}
-                    alt={`Event image ${carouselIndex + 1}`}
-                    onClick={() => openLightbox(carouselIndex)}
-                  />
-                  {eventImages.length > 1 && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => setCarouselIndex(i => (i - 1 + eventImages.length) % eventImages.length)}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/70 cursor-pointer"
-                      >&#8249;</button>
-                      <button
-                        type="button"
-                        onClick={() => setCarouselIndex(i => (i + 1) % eventImages.length)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/70 cursor-pointer"
-                      >&#8250;</button>
-                      <div className="flex justify-center gap-1">
-                        {eventImages.map((_, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => setCarouselIndex(i)}
-                            className={`w-2 h-2 rounded-full ${i === carouselIndex ? 'bg-[#15104a]' : 'bg-gray-300'} cursor-pointer position-absolute hover:bg-gray-400`}
-                          />
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div className="event-details-image bg-gray-100 flex items-center justify-center text-gray-400 text-sm">No image</div>
-              )}
-              <div className="event-details-organizer">
-                <h2 className="heading">Organizer: </h2>
-                <Link to={`/Profile/Organizer/${eventData.organizeremail}`} className="organizer-card hover:shadow-lg transition">
-                  <img src={eventData.profilepic} alt="Organizer Profile" /> {/* CHANGE LATER */}
-                  <p className="font-semibold text-lg text-[#15104a]">{eventData.organizationname}</p>
-                </Link>
+          <div className="event-details-top">
+            {/* Image carousel */}
+            {eventImages.length > 0 ? (
+              <div className="relative">
+                <img
+                  className="event-details-image cursor-zoom-in"
+                  src={eventImages[carouselIndex]}
+                  alt={`Event image ${carouselIndex + 1}`}
+                  onClick={() => openLightbox(carouselIndex)}
+                />
+                {eventImages.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setCarouselIndex(i => (i - 1 + eventImages.length) % eventImages.length)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full text-2xl w-10 h-12 flex items-center justify-center hover:bg-black/70 cursor-pointer"
+                    >&#8249;</button>
+                    <button
+                      type="button"
+                      onClick={() => setCarouselIndex(i => (i + 1) % eventImages.length)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full text-2xl w-10 h-12 flex items-center justify-center hover:bg-black/70 cursor-pointer"
+                    >&#8250;</button>
+                    <div className="flex justify-center gap-1">
+                      {eventImages.map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setCarouselIndex(i)}
+                          className={`w-2 h-2 rounded-full ${i === carouselIndex ? 'bg-[#15104a]' : 'bg-gray-300'} cursor-pointer position-absolute hover:bg-gray-400`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-              <div className="event-description">
-                <h2 className="font-bold underline text-[#15104a]">Details:</h2>
-                <p className="text-justify">{eventData.eventdetails}</p>
-                <br />
-                <div className="payment-info-section">
-                  <p><strong>Booth Fee:</strong> RM {eventData.boothfee}</p>
-                  <p><strong>Refundable Deposit:</strong> RM {eventData.refundabledepo}</p>
-                  <p><strong>Non-refundable Deposit:</strong> RM {eventData.nonrefundabledepo}</p>
-                  <p><strong>Full Payment:</strong> RM {eventData.fullpayment}</p>
-                </div>
-                <br />
-                Link: <a href={eventData.eventextlink} className="text-blue-500 underline" target="_blank" rel="noopener noreferrer">
-                  {eventData.eventextlink}
-                </a>
-              </div>
-            </div>
+            ) : (
+              <div className="event-details-image bg-gray-100 flex items-center justify-center text-gray-400 text-sm">No image</div>
+            )}
           </div>
+          <hr className="border-gray-500" />
 
-          <div className="event-details-right">
-            <div className="event-details-venue-date">
+          <div className="event-details-middle">
+            <div className="event-details-middle-L">
               <div className="date">
                 <h3>Date:</h3>
                 {new Date(eventData.eventstartdate).toDateString() === new Date(eventData.eventenddate).toDateString() ? (
@@ -240,25 +217,62 @@ const EventDetails = () => {
               </div>
             </div>
 
-            <div className="event-details-vendor-section">
-              <div className="event-details-vendor-heading">
-                <h2 className="heading">
-                  Assigned Booths (
-                  {isTheOrganizer
-                    ? `${eventData.assignedbooths} / ${eventData.boothslots}`
-                    : eventData.assignedbooths
-                  }
-                  ):
-                </h2>
-                {isTheOrganizer && (
-                  <Link to={`/BoothsManagement/${eventData.eventslug}`}>
-                    <button className="view-all-events">&gt; Manage Booths</button>
-                  </Link>
-                )}
+            <div className="event-details-middle-R">
+              <div className="event-details-organizer">
+                <Link to={`/Profile/Organizer/${eventData.organizeremail}`} className="organizer-card hover:shadow-lg transition">
+                  <img src={eventData.profilepic} alt="Organizer Profile" />
+                  <p className="font-semibold text-lg text-[#15104a]">{eventData.organizationname}</p>
+                </Link>
               </div>
-              <div className="vendor-list">
-                <VendorList eventId={eventData.eventid} isTheOrganizer={isTheOrganizer} />
+              <div className="event-description">
+                <p className="text-justify whitespace-pre-wrap">{eventData.eventdetails}</p>
+                <br />
+                <table className="payment-info-section">
+                  <tbody>
+                    <tr className="border-b border-gray-500">
+                      <td className="p-3 border-r border-gray-350"><strong>Booth Fee:</strong></td>
+                      <td className="p-3">RM {eventData.boothfee}</td>
+                    </tr>
+                    <tr className="border-b border-gray-500">
+                      <td className="p-3 border-r border-gray-350"><strong>Refundable Deposit:</strong></td>
+                      <td className="p-3">RM {eventData.refundabledepo}</td>
+                    </tr>
+                    <tr className="border-b border-gray-500">
+                      <td className="p-3 border-r border-gray-350"><strong>Non-refundable Deposit:</strong></td>
+                      <td className="p-3">RM {eventData.nonrefundabledepo}</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 border-r border-gray-350"><strong>Full Payment:</strong></td>
+                      <td className="p-3">RM {eventData.fullpayment}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <br />
+                <a href={eventData.eventextlink} className="text-blue-500 underline" target="_blank" rel="noopener noreferrer">
+                  {eventData.eventextlink}
+                </a>
               </div>
+            </div>
+          </div>
+          <hr className="border-gray-500" />
+          <div className="event-details-bottom">
+            <div className="event-details-vendor-heading">
+              <h2 className="heading">
+                Assigned Booths (
+                {isTheOrganizer
+                  ? `${eventData.assignedbooths} / ${eventData.boothslots}`
+                  : eventData.assignedbooths
+                }
+                ):
+              </h2>
+              {isTheOrganizer && (
+                <Link to={`/BoothsManagement/${eventData.eventslug}`}>
+                  <button className="view-all-events">&gt; Manage Booths</button>
+                </Link>
+              )}
+            </div>
+            <div className="vendor-list">
+              <VendorList eventId={eventData.eventid} isTheOrganizer={isTheOrganizer} />
             </div>
           </div>
         </div>

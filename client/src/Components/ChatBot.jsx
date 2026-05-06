@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { from: 'bot', text: "Hi! I'm Boi, the EventKamek Assistant. Ask me anything about events — dates, locations, booth availability, and more!" },
+    { from: 'bot', text: "Hi! I'm Jhon, the EventKamek Assistant. Ask me anything about events — dates, locations, booth availability, and more!" },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -55,7 +55,7 @@ const ChatBot = () => {
       {isOpen && (
         <div className="chatbot-window">
           <div className="chatbot-header">
-            <span>Boi — EventKamek Assistant</span>
+            <span>Jhon — EventKamek Assistant</span>
             <button onClick={() => setIsOpen(false)} className="chatbot-close">&times;</button>
           </div>
 
