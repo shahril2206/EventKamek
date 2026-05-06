@@ -247,7 +247,8 @@ const AddEvent = () => {
         alert('✅ Event created successfully!');
         navigate('/');
       } else {
-        alert('❌ Failed to create event');
+        const errorMessage = data.message || data.error || 'Failed to create event';
+        alert(`❌ ${errorMessage}`);
       }
     } catch (err) {
       console.error('Submit Error:', err);

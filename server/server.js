@@ -706,6 +706,31 @@ app.post('/api/events/create',
   try {
     await client.query('BEGIN');
 
+    const overlapQuery = `
+      SELECT eventid FROM events
+      WHERE
+        (
+          (eventlocation IS NOT NULL AND eventlocation = $1)
+          OR
+          (latitude IS NOT NULL AND longitude IS NOT NULL AND latitude = $2 AND longitude = $3)
+        )
+        AND eventstartdate <= $5
+        AND eventenddate >= $4
+      LIMIT 1
+    `;
+    const overlapResult = await client.query(overlapQuery, [
+      location || null,
+      lat || null,
+      lng || null,
+      startDate,
+      endDate,
+    ]);
+
+    if (overlapResult.rows.length > 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'Event overlaps with existing event at the same location on the date selected.' });
+    }
+
     // 1. Insert into events table
     const insertEventResult = await client.query(`
       INSERT INTO events (
@@ -762,7 +787,7 @@ app.post('/api/events/create',
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Event creation error:', err);
-    res.status(500).json({ error: 'Failed to create event', details: err.message });
+    res.status(500).json({ error: 'Failed to create event.', details: err.message });
   } finally {
     client.release();
   }
@@ -833,6 +858,42 @@ app.put('/api/events/update/:slug',
 
   try {
     console.log('🔍 Updated event data:', data);
+
+    const existingEventRes = await pool.query(
+      `SELECT eventid FROM events WHERE eventslug = $1`,
+      [slug]
+    );
+
+    if (existingEventRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Event not found.' });
+    }
+
+    const eventId = existingEventRes.rows[0].eventid;
+
+    const overlapQuery = `
+      SELECT eventid FROM events
+      WHERE eventid <> $1
+        AND (
+          (eventlocation IS NOT NULL AND eventlocation = $2)
+          OR
+          (latitude IS NOT NULL AND longitude IS NOT NULL AND latitude = $3 AND longitude = $4)
+        )
+        AND eventstartdate <= $6
+        AND eventenddate >= $5
+      LIMIT 1
+    `;
+    const overlapResult = await pool.query(overlapQuery, [
+      eventId,
+      data.location || null,
+      data.lat || null,
+      data.lng || null,
+      data.startDate,
+      data.endDate,
+    ]);
+
+    if (overlapResult.rows.length > 0) {
+      return res.status(400).json({ error: 'Event overlaps with existing event at the same location on the date selected.' });
+    }
 
     const result = await pool.query(
       `UPDATE events SET
